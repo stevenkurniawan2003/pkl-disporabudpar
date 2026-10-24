@@ -24,12 +24,20 @@ class DetailBerita extends Component
             session()->put("dibaca.{$berita->id}", true);
         }
 
-        $this->berita = $berita->load('kategori');
+        $this->berita = $berita->load(['kategori', 'penulis']);
     }
 
     public function render()
     {
-        return view('livewire.publik.detail-berita')
-            ->title($this->berita->judul.' · Disporabudpar Jember');
+        return view('livewire.publik.detail-berita', [
+            // 4 berita tayang terbaru selain yang sedang dibuka.
+            'lainnya' => Berita::with('kategori')
+                ->terbit()
+                ->whereKeyNot($this->berita->getKey())
+                ->latest('tanggal_terbit')
+                ->latest('id')
+                ->limit(4)
+                ->get(),
+        ])->title($this->berita->judul.' · Disporabudpar Jember');
     }
 }

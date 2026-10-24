@@ -3,17 +3,22 @@
 
     // Menu admin. Item yang route-nya belum dibuat otomatis disembunyikan.
     $menu = [
-        'Ringkasan' => [
+        'Utama' => [
             ['📊', 'Dashboard', 'admin.dashboard', 'admin.dashboard'],
-        ],
-        'Konten' => [
-            ['📍', 'Destinasi', 'admin.destinasi', 'admin.destinasi*'],
             ['📰', 'Berita', 'admin.berita', 'admin.berita*'],
         ],
-        'Data' => [
-            ['🏨', 'Kunjungan Hotel', 'admin.kunjungan-hotel', 'admin.kunjungan-hotel*'],
-            ['🎨', 'Ekonomi Kreatif', 'admin.ekonomi-kreatif', 'admin.ekonomi-kreatif*'],
+        'Data Master' => [
+            ['📍', 'Wisata', 'admin.wisata', 'admin.wisata*'],
+            ['🏨', 'Hotel', 'admin.hotel', 'admin.hotel'],
             ['🎭', 'Kesenian', 'admin.kesenian', 'admin.kesenian*'],
+            ['🎨', 'Ekraf', 'admin.ekonomi-kreatif', 'admin.ekonomi-kreatif*'],
+        ],
+        'Kelola Data Kunjungan' => [
+            ['📈', 'Data Kunjungan Wisata', 'admin.kunjungan-wisata', 'admin.kunjungan-wisata*'],
+            ['🛏', 'Data Kunjungan Hotel', 'admin.kunjungan-hotel', 'admin.kunjungan-hotel*'],
+        ],
+        'Akun' => [
+            ['👤', 'Profil', 'admin.profil', 'admin.profil*'],
         ],
     ];
 @endphp

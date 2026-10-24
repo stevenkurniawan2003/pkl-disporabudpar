@@ -5,17 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Destinasi extends Model
+class Wisata extends Model
 {
     use SoftDeletes;
 
-    protected $table = 'destinasi';
+    protected $table = 'wisata';
 
     protected $fillable = [
-        'kategori_id', 'kecamatan_id', 'nama', 'slug', 'narasi', 'alamat',
-        'latitude', 'longitude', 'gambar_utama', 'unggulan', 'status', 'dibuat_oleh',
+        'kategori_id', 'kecamatan_id', 'nama', 'slug', 'deskripsi_singkat', 'narasi', 'alamat',
+        'latitude', 'longitude', 'link_google_maps', 'gambar_utama', 'unggulan', 'status', 'dibuat_oleh',
     ];
 
     protected function casts(): array
@@ -29,7 +30,7 @@ class Destinasi extends Model
 
     public function kategori(): BelongsTo
     {
-        return $this->belongsTo(KategoriDestinasi::class, 'kategori_id');
+        return $this->belongsTo(KategoriWisata::class, 'kategori_id');
     }
 
     public function kecamatan(): BelongsTo
@@ -40,6 +41,18 @@ class Destinasi extends Model
     public function pembuat(): BelongsTo
     {
         return $this->belongsTo(User::class, 'dibuat_oleh');
+    }
+
+    /** Foto-foto tambahan. Foto utama tetap disimpan di kolom gambar_utama. */
+    public function galeri(): HasMany
+    {
+        return $this->hasMany(GaleriWisata::class, 'wisata_id')->orderBy('urutan')->orderBy('id');
+    }
+
+    /** Jumlah pengunjung per bulan (domestik dan mancanegara). */
+    public function kunjungan(): HasMany
+    {
+        return $this->hasMany(KunjunganWisata::class, 'wisata_id');
     }
 
     /** Hanya yang berstatus "tayang" boleh muncul di halaman publik. */

@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Models\Destinasi;
-use App\Models\KategoriDestinasi;
+use App\Models\KategoriWisata;
 use App\Models\Kecamatan;
+use App\Models\Wisata;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 /**
  * Data CONTOH untuk mencoba tampilan. Boleh dijalankan sekali:
- *   php artisan db:seed --class=DestinasiSeeder
+ *   php artisan db:seed --class=WisataSeeder
  * Setelah itu semua data bisa diubah/dihapus lewat admin.
  */
-class DestinasiSeeder extends Seeder
+class WisataSeeder extends Seeder
 {
     public function run(): void
     {
@@ -27,7 +27,7 @@ class DestinasiSeeder extends Seeder
         ];
 
         foreach ($contoh as [$nama, $kategori, $kecamatan, $alamat, $lat, $lng, $unggulan, $narasi]) {
-            $kat = KategoriDestinasi::where('nama', $kategori)->first();
+            $kat = KategoriWisata::where('nama', $kategori)->first();
             $kec = Kecamatan::where('nama', $kecamatan)->first();
 
             if (! $kat || ! $kec) {
@@ -35,7 +35,7 @@ class DestinasiSeeder extends Seeder
                 continue;
             }
 
-            Destinasi::withTrashed()->updateOrCreate(
+            Wisata::withTrashed()->updateOrCreate(
                 ['slug' => Str::slug($nama)],
                 [
                     'kategori_id' => $kat->id,
@@ -52,6 +52,6 @@ class DestinasiSeeder extends Seeder
             );
         }
 
-        $this->command?->info('Data contoh destinasi siap.');
+        $this->command?->info('Data contoh wisata siap.');
     }
 }

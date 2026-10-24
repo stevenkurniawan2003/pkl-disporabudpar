@@ -7,16 +7,19 @@ use App\Models\KategoriBerita;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Layout;
-use Livewire\Attributes\Title;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-#[Layout('layouts.admin')]
-#[Title('Form Berita · Admin Disporabudpar Jember')]
+/**
+ * Modal tulis/ubah berita. Ditempel di halaman daftar berita (Admin\Berita)
+ * dan dibuka lewat event "buka-form-berita".
+ */
 class BeritaForm extends Component
 {
     use WithFileUploads;
+
+    public bool $terbuka = false;
 
     public ?int $beritaId = null;
 
@@ -36,9 +39,14 @@ class BeritaForm extends Component
 
     public $gambarBaru = null;
 
-    public function mount(?Berita $berita = null): void
+    #[On('buka-form-berita')]
+    public function buka(?int $id = null): void
     {
-        if ($berita && $berita->exists) {
+        $this->resetForm();
+
+        if ($id) {
+            $berita = Berita::findOrFail($id);
+
             $this->beritaId = $berita->id;
             $this->judul = $berita->judul;
             $this->kategori_berita_id = $berita->kategori_berita_id;
@@ -50,6 +58,19 @@ class BeritaForm extends Component
         } else {
             $this->tanggal = now()->format('Y-m-d');
         }
+
+        $this->terbuka = true;
+    }
+
+    public function tutup(): void
+    {
+        $this->resetForm();
+    }
+
+    private function resetForm(): void
+    {
+        $this->reset();
+        $this->resetValidation();
     }
 
     protected function rules(): array
@@ -91,10 +112,16 @@ class BeritaForm extends Component
         ];
     }
 
-    public function simpan()
+    public function simpan(): void
     {
         $data = $this->validate();
-        $berita = $this->beritaId ? Berita::findOrFail($this->beritaId) : null;
+        $berita = $this->beritaId ? Berita::find($this->beritaId) : null;
+
+        if ($this->beritaId && ! $berita) {
+            $this->addError('simpan', 'Berita tidak ditemukan, mungkin sudah dihapus.');
+
+            return;
+        }
 
         // Tanggal terbit: pakai tanggal yang dipilih; kalau kosong dan status terbit, pakai sekarang.
         $tanggalTerbit = null;
@@ -117,23 +144,41 @@ class BeritaForm extends Component
             'tanggal_terbit' => $tanggalTerbit,
         ];
 
-        if ($this->gambarBaru) {
-            $atribut['gambar_sampul'] = $this->gambarBaru->store('berita', 'public');
-        }
+        $fileBaru = null;
+        $fileDibuang = null;
 
-        if ($berita) {
-            if ($this->gambarBaru && $berita->gambar_sampul) {
-                Storage::disk('public')->delete($berita->gambar_sampul);
+        try {
+            if ($this->gambarBaru) {
+                $atribut['gambar_sampul'] = $fileBaru = $this->gambarBaru->store('berita', 'public');
             }
 
-            $berita->update($atribut);
-            $pesan = "Berita \"{$berita->judul}\" diperbarui.";
-        } else {
-            $atribut['slug'] = $this->buatSlug($atribut['judul']);
-            $atribut['penulis_id'] = auth()->id();
+            if ($berita) {
+                if ($fileBaru && $berita->gambar_sampul) {
+                    $fileDibuang = $berita->gambar_sampul;
+                }
 
-            $berita = Berita::create($atribut);
-            $pesan = "Berita \"{$berita->judul}\" disimpan.";
+                $berita->update($atribut);
+                $pesan = "Berita \"{$berita->judul}\" diperbarui.";
+            } else {
+                $atribut['slug'] = $this->buatSlug($atribut['judul']);
+                $atribut['penulis_id'] = auth()->id();
+
+                $berita = Berita::create($atribut);
+                $pesan = "Berita \"{$berita->judul}\" disimpan.";
+            }
+        } catch (\Throwable $e) {
+            report($e);
+            if ($fileBaru) {
+                Storage::disk('public')->delete($fileBaru);
+            }
+            $this->addError('simpan', 'Berita gagal disimpan. Silakan coba lagi.');
+
+            return;
+        }
+
+        // Gambar lama baru dihapus setelah data pasti tersimpan.
+        if ($fileDibuang) {
+            Storage::disk('public')->delete($fileDibuang);
         }
 
         if ($berita->status === 'draf') {
@@ -142,9 +187,14 @@ class BeritaForm extends Component
             $pesan .= ' Tanggal terbit di masa depan, tampil di publik mulai tanggal tersebut.';
         }
 
-        session()->flash('pesan', $pesan);
+        $this->resetForm();
+        $this->dispatch('berita-disimpan', pesan: $pesan);
+    }
 
-        return $this->redirectRoute('admin.berita', navigate: true);
+    /** Periksa gambar sampul begitu dipilih, supaya file yang salah langsung ketahuan. */
+    public function updatedGambarBaru(): void
+    {
+        $this->validateOnly('gambarBaru');
     }
 
     public function hapusGambar(): void
@@ -168,7 +218,7 @@ class BeritaForm extends Component
     public function render()
     {
         return view('livewire.admin.berita-form', [
-            'daftarKategori' => KategoriBerita::orderBy('nama')->get(),
+            'daftarKategori' => $this->terbuka ? KategoriBerita::orderBy('nama')->get() : collect(),
         ]);
     }
 }

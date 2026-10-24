@@ -79,10 +79,11 @@ class Berita extends Model
         return $this->tanggal_terbit?->locale('id')->translatedFormat('j F Y') ?? '';
     }
 
+    /** Ringkasan dari admin; kalau kosong, cuplikan ±150 karakter dari isi tanpa tag HTML. */
     public function getRingkasanTampilAttribute(): string
     {
         return $this->ringkasan
-            ?: Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($this->isi))), 160);
+            ?: Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($this->isi))), 150);
     }
 
     /** Isi berita dipecah per paragraf (baris kosong). Tampilkan dengan e() supaya aman dari XSS. */

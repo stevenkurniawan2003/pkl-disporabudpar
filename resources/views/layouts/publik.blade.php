@@ -2,30 +2,39 @@
     // Menu otomatis: item yang route-nya belum dibuat disembunyikan, jadi tidak pernah error.
     $menu = [
         ['Beranda', 'publik.beranda'],
-        ['Wisata', [
+        ['Destinasi', [
             ['Peta Wisata', 'publik.peta-wisata'],
-            ['Kunjungan Wisata', 'publik.kunjungan-wisata'],
-            ['Kunjungan Hotel', 'publik.kunjungan-hotel'],
-        ]],
-        ['Budaya & Ekraf', [
-            ['Data Kesenian', 'publik.data-kesenian'],
-            ['Data Ekraf', 'publik.data-ekraf'],
+            ['Data Kunjungan Wisata', 'publik.kunjungan-wisata'],
+            ['Data Kunjungan Hotel', 'publik.kunjungan-hotel'],
         ]],
         ['Berita', 'publik.berita'],
-        ['Tentang Kami', [
-            ['Profil', 'publik.profil'],
-            ['Struktur Organisasi', 'publik.struktur-organisasi'],
-            ['Hubungi Kami', 'publik.hubungi-kami'],
+        ['Kebudayaan', 'publik.kebudayaan'],
+        ['Ekonomi Kreatif', 'publik.ekonomi-kreatif'],
+        ['Profil', [
+            ['Tentang Kami', 'publik.profil.tentang-kami'],
+            ['Visi Misi', 'publik.profil.visi-misi'],
+            ['Struktur Organisasi', 'publik.profil.struktur-organisasi'],
+            ['Tugas dan Fungsi', 'publik.profil.tugas-dan-fungsi'],
         ]],
     ];
+    // Route lain yang ikut menandai menu sebagai aktif (misalnya detail berita -> menu Berita).
+    $aktifJuga = [
+        'publik.berita' => ['publik.detail-berita'],
+        'publik.peta-wisata' => ['publik.detail-wisata', 'publik.detail-hotel'],
+        'publik.kebudayaan' => ['publik.detail-kesenian'],
+        'publik.ekonomi-kreatif' => ['publik.detail-ekraf'],
+    ];
     $ada = fn ($nama) => \Illuminate\Support\Facades\Route::has($nama);
-    $aktif = fn ($nama) => request()->routeIs($nama) || request()->routeIs($nama.'.*');
+    $aktif = fn ($nama) => request()->routeIs($nama, $nama.'.*', ...($aktifJuga[$nama] ?? []));
+    $angka = fn ($n) => number_format((int) $n, 0, ',', '.');
+    $sosmed = array_values(array_filter($situs['media_sosial'], fn ($s) => filled($s['url'])));
 @endphp
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{ $title ?? 'Disporabudpar Jember' }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="{{ asset('css/publik.css') }}">
 <script>try{var t=localStorage.getItem('publik-tema');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 @livewireStyles
@@ -37,8 +46,8 @@
             <span class="lg">J</span>
             <span>Disporabudpar<small>Kabupaten Jember</small></span>
         </a>
-        <button type="button" class="bg" aria-label="Menu">☰</button>
-        <nav>
+        <button type="button" class="bg" aria-label="Buka menu" aria-controls="menu-utama" aria-expanded="false">☰</button>
+        <nav id="menu-utama" aria-label="Menu utama">
             @foreach ($menu as [$label, $tujuan])
                 @if (is_string($tujuan))
                     @if ($ada($tujuan))
@@ -68,21 +77,66 @@
 <footer>
     <div class="w">
         <div class="fg">
-            <div>
-                <h4>Disporabudpar Kabupaten Jember</h4>
-                <p>Dinas yang melayani urusan kepemudaan, olahraga, kebudayaan, dan pariwisata.</p>
+            {{-- Kolom 1: dinas + media sosial --}}
+            <div class="f-dinas">
+                <a class="logo" href="{{ route('publik.beranda') }}" wire:navigate>
+                    <span class="lg">J</span>
+                    <span>Disporabudpar<small>Kabupaten Jember</small></span>
+                </a>
+                <p class="f-nama">{{ $situs['nama_dinas'] }}</p>
+                <p>{{ $situs['deskripsi'] }}</p>
+                @if ($sosmed)
+                    <div class="sosmed">
+                        @foreach ($sosmed as $s)
+                            <a href="{{ $s['url'] }}" target="_blank" rel="noopener noreferrer" aria-label="Disporabudpar Jember di {{ $s['nama'] }}" title="{{ $s['nama'] }}"><i class="bi bi-{{ $s['ikon'] }}" aria-hidden="true"></i></a>
+                        @endforeach
+                    </div>
+                @endif
             </div>
+
+            {{-- Kolom 2: tautan cepat --}}
             <div>
-                <h4>Jelajahi</h4>
-                <p><a href="{{ route('publik.peta-wisata') }}" wire:navigate>Peta Wisata</a></p>
-                @if ($ada('publik.berita'))<p><a href="{{ route('publik.berita') }}" wire:navigate>Berita</a></p>@endif
+                <h4>Tautan Cepat</h4>
+                <ul class="f-link">
+                    @foreach ($situs['tautan_cepat'] as $t)
+                        <li><a href="{{ $t['url'] }}" target="_blank" rel="noopener noreferrer">{{ $t['nama'] }} <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span class="sr">(tab baru)</span></a></li>
+                    @endforeach
+                </ul>
             </div>
+
+            {{-- Kolom 3: pengunjung situs --}}
             <div>
-                <h4>Admin</h4>
-                <p><a href="{{ route('admin.login') }}">Masuk admin</a></p>
+                <h4>Pengunjung</h4>
+                <dl class="f-statistik">
+                    <div><dt>Hari ini</dt><dd>{{ $angka($statistikPengunjung['hari_ini']) }}</dd></div>
+                    <div><dt>Bulan ini</dt><dd>{{ $angka($statistikPengunjung['bulan_ini']) }}</dd></div>
+                    <div class="total"><dt>Total</dt><dd>{{ $angka($statistikPengunjung['total']) }}</dd></div>
+                </dl>
+            </div>
+
+            {{-- Kolom 4: hubungi kami + peta kantor --}}
+            <div>
+                <h4>Hubungi Kami</h4>
+                @persist('peta-kantor')
+                    <div class="f-peta">
+                        <iframe src="{{ $situs['peta_embed'] }}" title="Peta lokasi kantor Disporabudpar Kabupaten Jember" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                @endpersist
+                <ul class="f-kontak">
+                    <li><i class="bi bi-geo-alt" aria-hidden="true"></i><span>{{ $situs['kontak']['alamat'] }}</span></li>
+                    @if (filled($situs['kontak']['telepon']))
+                        <li><i class="bi bi-telephone" aria-hidden="true"></i><a href="tel:{{ preg_replace('/[^0-9+]/', '', $situs['kontak']['telepon']) }}">{{ $situs['kontak']['telepon'] }}</a></li>
+                    @endif
+                    @if (filled($situs['kontak']['email']))
+                        <li><i class="bi bi-envelope" aria-hidden="true"></i><a href="mailto:{{ $situs['kontak']['email'] }}">{{ $situs['kontak']['email'] }}</a></li>
+                    @endif
+                </ul>
             </div>
         </div>
-        <div class="cp">© {{ date('Y') }} Disporabudpar Kabupaten Jember</div>
+        <div class="cp">
+            <span>© {{ date('Y') }} Disporabudpar Kabupaten Jember</span>
+            <a href="{{ route('admin.login') }}">Masuk admin</a>
+        </div>
     </div>
 </footer>
 
@@ -95,7 +149,13 @@
     document.addEventListener('click', function (e) {
         var t = e.target;
 
-        if (t.closest('.bg')) { q('header nav').forEach(function (n) { n.classList.toggle('on'); }); return; }
+        var burger = t.closest('.bg');
+        if (burger) {
+            var buka = !document.getElementById('menu-utama').classList.contains('on');
+            q('header nav').forEach(function (n) { n.classList.toggle('on', buka); });
+            burger.setAttribute('aria-expanded', buka ? 'true' : 'false');
+            return;
+        }
 
         if (t.closest('#th')) {
             var el = document.documentElement;
@@ -116,6 +176,7 @@
     // Tutup menu setelah pindah halaman
     document.addEventListener('livewire:navigated', function () {
         q('header nav').forEach(function (n) { n.classList.remove('on'); });
+        q('.bg').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
         q('.ni.open').forEach(function (n) { n.classList.remove('open'); });
     });
 

@@ -17,28 +17,38 @@ Route::prefix('admin')->group(function () {
     Route::middleware(['auth', 'admin.aktif'])->group(function () {
         Route::get('/dashboard', Admin\Dashboard::class)->name('admin.dashboard');
 
-        Route::get('/destinasi', Admin\Destinasi::class)->name('admin.destinasi');
-        Route::get('/destinasi/tambah', Admin\DestinasiForm::class)->name('admin.destinasi-form');
-        Route::get('/destinasi/{destinasi}/ubah', Admin\DestinasiForm::class)->name('admin.destinasi-ubah');
-
+        // Tambah, ubah, dan detail memakai modal di halaman daftar masing-masing.
+        Route::get('/wisata', Admin\Wisata::class)->name('admin.wisata');
+        Route::get('/hotel', Admin\Hotel::class)->name('admin.hotel');
         Route::get('/berita', Admin\Berita::class)->name('admin.berita');
-        Route::get('/berita/tulis', Admin\BeritaForm::class)->name('admin.berita-form');
-        Route::get('/berita/{berita}/ubah', Admin\BeritaForm::class)->name('admin.berita-ubah');
-        // Route::get('/kunjungan-hotel', Admin\KunjunganHotel::class)->name('admin.kunjungan-hotel');
-        // Route::get('/ekonomi-kreatif', Admin\EkonomiKreatif::class)->name('admin.ekonomi-kreatif');
-        // Route::get('/kesenian', Admin\Kesenian::class)->name('admin.kesenian');
+        Route::get('/kesenian', Admin\Kesenian::class)->name('admin.kesenian');
+        Route::get('/ekonomi-kreatif', Admin\Ekraf::class)->name('admin.ekonomi-kreatif');
+        Route::get('/kunjungan-wisata', Admin\KunjunganWisata::class)->name('admin.kunjungan-wisata');
+        Route::get('/kunjungan-hotel', Admin\KunjunganHotel::class)->name('admin.kunjungan-hotel');
     });
 });
 
-// PUBLIK
-Route::get('/publik/beranda', Publik\Beranda::class)->name('publik.beranda');
-Route::get('/publik/peta-wisata', Publik\PetaWisata::class)->name('publik.peta-wisata');
-// Route::get('/publik/kunjungan-wisata', Publik\KunjunganWisata::class)->name('publik.kunjungan-wisata');
-// Route::get('/publik/kunjungan-hotel', Publik\KunjunganHotel::class)->name('publik.kunjungan-hotel');
-// Route::get('/publik/data-kesenian', Publik\DataKesenian::class)->name('publik.data-kesenian');
-// Route::get('/publik/data-ekraf', Publik\DataEkraf::class)->name('publik.data-ekraf');
-Route::get('/publik/berita', Publik\Berita::class)->name('publik.berita');
-Route::get('/publik/berita/{berita:slug}', Publik\DetailBerita::class)->name('publik.detail-berita');
-// Route::get('/publik/profil', Publik\Profil::class)->name('publik.profil');
-// Route::get('/publik/struktur-organisasi', Publik\StrukturOrganisasi::class)->name('publik.struktur-organisasi');
-// Route::get('/publik/hubungi-kami', Publik\HubungiKami::class)->name('publik.hubungi-kami');
+// PUBLIK: tanpa login. catat.kunjungan menghitung pengunjung situs (sekali per sesi per hari).
+Route::middleware('catat.kunjungan')->prefix('publik')->name('publik.')->group(function () {
+    Route::get('/beranda', Publik\Beranda::class)->name('beranda');
+
+    // Destinasi
+    Route::get('/peta-wisata', Publik\PetaWisata::class)->name('peta-wisata');
+    Route::get('/wisata/{wisata:slug}', Publik\DetailWisata::class)->name('detail-wisata');
+    Route::get('/hotel/{hotel}', Publik\DetailHotel::class)->name('detail-hotel');
+    Route::get('/kunjungan-wisata', Publik\KunjunganWisata::class)->name('kunjungan-wisata');
+    Route::get('/kunjungan-hotel', Publik\KunjunganHotel::class)->name('kunjungan-hotel');
+
+    Route::get('/berita', Publik\Berita::class)->name('berita');
+    Route::get('/berita/{berita:slug}', Publik\DetailBerita::class)->name('detail-berita');
+
+    Route::get('/kebudayaan', Publik\Kebudayaan::class)->name('kebudayaan');
+    Route::get('/kebudayaan/{kesenian}', Publik\DetailKesenian::class)->name('detail-kesenian');
+    Route::get('/ekonomi-kreatif', Publik\EkonomiKreatif::class)->name('ekonomi-kreatif');
+    Route::get('/ekonomi-kreatif/{ekraf}', Publik\DetailEkraf::class)->name('detail-ekraf');
+
+    // Profil (statis): satu komponen, halaman ditentukan lewat defaults('halaman', ...).
+    foreach (array_keys(Publik\Profil::HALAMAN) as $halaman) {
+        Route::get('/profil/'.$halaman, Publik\Profil::class)->name('profil.'.$halaman)->defaults('halaman', $halaman);
+    }
+});

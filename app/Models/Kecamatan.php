@@ -13,8 +13,8 @@ class Kecamatan extends Model
 
     protected $fillable = ['nama'];
 
-    public function destinasi(): HasMany
+    public function wisata(): HasMany
     {
-        return $this->hasMany(Destinasi::class, 'kecamatan_id');
+        return $this->hasMany(Wisata::class, 'kecamatan_id');
     }
 }

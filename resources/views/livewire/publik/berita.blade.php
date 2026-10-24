@@ -1,5 +1,10 @@
 <div>
 <div class="page"><h1>Berita</h1><p>Kabar terbaru dari Disporabudpar Jember.</p>
+
+<div class="tools">
+    <input type="search" wire:model.live.debounce.400ms="cari" placeholder="Cari judul berita…" aria-label="Cari judul berita" class="cari-berita">
+</div>
+
 <div class="tools">
     <button type="button" class="chip {{ $kategori === 'Semua' ? 'on' : '' }}" wire:click="pilihKategori('Semua')">Semua</button>
     @foreach ($daftarKategori as $k)
@@ -9,12 +14,15 @@
 
 <div class="news">
 @forelse ($daftar as $b)
-    <a class="c" wire:key="b-{{ $b->id }}" href="{{ route('publik.detail-berita', $b) }}" wire:navigate>
-        <div class="ph s" style="background:{{ $b->gambar_url ? 'url('.$b->gambar_url.') center/cover no-repeat' : $b->gradien }}">@unless ($b->gambar_url)📰@endunless</div>
-        <div class="cb"><span class="bd">{{ $b->kategori?->nama }}</span><b>{{ $b->judul }}</b><small>{{ $b->tanggal_teks }} · dibaca {{ number_format($b->jumlah_dibaca, 0, ',', '.') }} kali</small></div>
-    </a>
+    @include('livewire.publik.partials.kartu-berita', ['b' => $b, 'cuplikan' => true])
 @empty
-    <p style="color:var(--mut)">Belum ada berita{{ $kategori !== 'Semua' ? ' pada kategori '.$kategori : '' }}.</p>
+    <p class="kosong-berita">
+        @if (trim($cari) !== '')
+            Tidak ada berita dengan judul "{{ $cari }}"{{ $kategori !== 'Semua' ? ' pada kategori '.$kategori : '' }}.
+        @else
+            Belum ada berita{{ $kategori !== 'Semua' ? ' pada kategori '.$kategori : '' }}.
+        @endif
+    </p>
 @endforelse
 </div>
 

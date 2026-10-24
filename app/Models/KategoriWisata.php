@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class KategoriDestinasi extends Model
+class KategoriWisata extends Model
 {
-    protected $table = 'kategori_destinasi';
+    protected $table = 'kategori_wisata';
 
     public $timestamps = false;
 
     protected $fillable = ['nama', 'slug'];
 
-    public function destinasi(): HasMany
+    public function wisata(): HasMany
     {
-        return $this->hasMany(Destinasi::class, 'kategori_id');
+        return $this->hasMany(Wisata::class, 'kategori_id');
     }
 
     /** Ikon kecil untuk kartu tanpa foto. */
