@@ -26,12 +26,7 @@
 @endforelse
 </div>
 
-@if ($daftar->hasPages())
-<div class="tools" style="justify-content:center;margin-top:20px">
-    <button type="button" class="chip" wire:click="previousPage" @disabled($daftar->onFirstPage())>‹ Sebelumnya</button>
-    <span style="color:var(--mut)">Halaman {{ $daftar->currentPage() }} dari {{ $daftar->lastPage() }}</span>
-    <button type="button" class="chip" wire:click="nextPage" @disabled(! $daftar->hasMorePages())>Berikutnya ›</button>
-</div>
-@endif
+{{-- Pagination Livewire: pindah halaman tanpa memuat ulang, lalu gulir ke atas daftar. --}}
+{{ $daftar->links('livewire.publik.partials.pagination', ['scrollTo' => '.page']) }}
 </div>
 </div>

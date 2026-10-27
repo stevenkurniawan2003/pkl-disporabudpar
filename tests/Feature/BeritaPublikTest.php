@@ -70,7 +70,7 @@ class BeritaPublikTest extends TestCase
         }
 
         Livewire::test(BeritaPublik::class)
-            ->assertViewHas('daftar', fn ($d) => $d->total() === 11 && $d->count() === 9 && $d->lastPage() === 2)
+            ->assertViewHas('daftar', fn ($d) => $d->total() === 11 && $d->count() === 8 && $d->lastPage() === 2)
             ->set('cari', 'argopuro')
             ->assertSee('Festival Hyang Argopuro')
             ->assertDontSee('Berita nomor 1')
@@ -90,8 +90,8 @@ class BeritaPublikTest extends TestCase
             ->assertOk()
             ->assertSee('<title>Berita Utama · Disporabudpar Jember</title>', false)
             ->assertSee('oleh Rina Admin')
-            ->assertSee('Paragraf dua.')
-            ->assertSee('&lt;script&gt;', false) // isi di-escape
+            ->assertSee('<p>Paragraf dua.</p>', false)
+            ->assertDontSee('<script>x</script>', false) // tag berbahaya dibuang HTML Purifier
             ->assertSee('Berita Lainnya')
             ->assertSeeInOrder(['Lainnya 1', 'Lainnya 2', 'Lainnya 3', 'Lainnya 4'])
             ->assertDontSee('Lainnya 5'); // maksimal 4

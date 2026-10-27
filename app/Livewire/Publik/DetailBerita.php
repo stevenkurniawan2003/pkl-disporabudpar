@@ -24,12 +24,13 @@ class DetailBerita extends Component
             session()->put("dibaca.{$berita->id}", true);
         }
 
-        $this->berita = $berita->load(['kategori', 'penulis']);
+        $this->berita = $berita->load(['kategori', 'penulis', 'galeri']);
     }
 
     public function render()
     {
         return view('livewire.publik.detail-berita', [
+            'galeri' => $this->berita->galeri->map(fn ($g) => ['url' => $g->gambar_url, 'keterangan' => null])->all(),
             // 4 berita tayang terbaru selain yang sedang dibuka.
             'lainnya' => Berita::with('kategori')
                 ->terbit()

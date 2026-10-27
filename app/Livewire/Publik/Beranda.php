@@ -62,12 +62,12 @@ class Beranda extends Component
             'unggulan' => $cadangan ? $wisata()->get() : $unggulan,
             'unggulanCadangan' => $cadangan,
 
-            // Berita terbit (tanggal terbit sudah tiba), 4 terbaru.
+            // Berita terbit (tanggal terbit sudah tiba), 6 terbaru: 2 pertama jadi kartu utama, sisanya kartu biasa.
             'berita' => Berita::with('kategori')
                 ->terbit()
                 ->latest('tanggal_terbit')
                 ->latest('id')
-                ->limit(4)
+                ->limit(6)
                 ->get(),
 
             'kunjungan' => self::ringkasanKunjungan(),

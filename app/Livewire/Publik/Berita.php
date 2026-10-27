@@ -44,7 +44,7 @@ class Berita extends Component
             ->when($kata !== '', fn ($q) => $q->where('judul', 'like', '%'.addcslashes($kata, '%_\\').'%'))
             ->latest('tanggal_terbit')
             ->latest('id')
-            ->paginate(9);
+            ->paginate(8);
 
         return view('livewire.publik.berita', [
             'daftar' => $daftar,

@@ -108,4 +108,68 @@ class BeritaFormTest extends TestCase
             ->assertHasNoErrors()
             ->assertSee('Pratinjau gambar baru');
     }
+
+    public function test_isi_berita_html_dibersihkan_dan_teks_lama_jadi_paragraf(): void
+    {
+        $this->isiForm()
+            ->set('isi', '<p><strong>Tebal</strong> dan <em>miring</em><script>alert(1)</script></p><p onclick="x()">Dua</p>')
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $isi = Berita::firstOrFail()->isi;
+        $this->assertStringContainsString('<strong>Tebal</strong>', $isi);
+        $this->assertStringContainsString('<em>miring</em>', $isi);
+        $this->assertStringNotContainsString('<script>', $isi);
+        $this->assertStringNotContainsString('onclick', $isi);
+
+        // Teks lama (tanpa tag) dibuka di editor sebagai paragraf HTML.
+        $lama = Berita::create([
+            'kategori_berita_id' => KategoriBerita::first()->id, 'judul' => 'Lama', 'slug' => 'lama',
+            'isi' => "Satu <tidak tag\n\nDua", 'status' => 'draf',
+        ]);
+        Livewire::test(BeritaForm::class)
+            ->call('buka', $lama->id)
+            ->assertSet('isi', "<p>Satu &lt;tidak tag</p>\n<p>Dua</p>");
+    }
+
+    public function test_isi_editor_kosong_ditolak(): void
+    {
+        $this->isiForm()->set('isi', '<p>&nbsp;</p>')->call('simpan')->assertHasErrors(['isi' => 'required']);
+    }
+
+    public function test_mini_galeri_tambah_dan_hapus_foto(): void
+    {
+        $this->isiForm()
+            ->set('unggahGaleri', [UploadedFile::fake()->image('a.jpg'), UploadedFile::fake()->image('b.jpg')])
+            ->assertCount('galeriBaru', 2)
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $berita = Berita::with('galeri')->firstOrFail();
+        $this->assertCount(2, $berita->galeri);
+        $dihapus = $berita->galeri->first()->gambar;
+        Storage::disk('public')->assertExists($dihapus);
+
+        Livewire::test(BeritaForm::class)
+            ->call('buka', $berita->id)
+            ->assertCount('galeri', 2)
+            ->call('tandaiHapusGaleri', 0)
+            ->call('simpan')
+            ->assertHasNoErrors();
+
+        $this->assertCount(1, $berita->fresh()->galeri);
+        Storage::disk('public')->assertMissing($dihapus);
+
+        // Tampil di detail berita publik sebagai mini galeri.
+        $berita->update(['status' => 'terbit', 'tanggal_terbit' => now()->subHour()]);
+        $this->get(route('publik.detail-berita', $berita))->assertOk()->assertSee('Galeri foto')->assertSee('id="lightbox"', false);
+    }
+
+    public function test_mini_galeri_maksimal_10_foto(): void
+    {
+        $this->isiForm()
+            ->set('unggahGaleri', array_map(fn ($i) => UploadedFile::fake()->image("f{$i}.jpg"), range(1, 11)))
+            ->assertHasErrors('unggahGaleri')
+            ->assertCount('galeriBaru', 0);
+    }
 }

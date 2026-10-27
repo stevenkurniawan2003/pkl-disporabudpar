@@ -66,8 +66,9 @@ class BerandaPublikTest extends TestCase
                 'Destinasi unggulan', 'Lihat peta wisata',
                 'Bidang dan UPTD', 'Pariwisata', 'UPTD Olahraga',
                 'Berita terbaru', 'Semua berita',
-                'Kunjungan wisatawan', 'Kunjungan hotel', 'Kartu induk kesenian', 'Data ekraf',
+                'Kunjungan wisatawan', 'Kunjungan hotel',
             ])
+            ->assertDontSee('Kartu induk kesenian') // bagian Layanan sudah dihapus
             ->assertDontSee('521.343') // angka contoh desain sudah tidak ditulis langsung
             ->assertSee('class="nb on" href="'.route('publik.beranda').'"', false);
     }
@@ -93,16 +94,19 @@ class BerandaPublikTest extends TestCase
             ->assertDontSee('Masih Draf');
     }
 
-    public function test_maksimal_4_wisata_dan_4_berita_terbaru(): void
+    public function test_maksimal_4_wisata_dan_6_berita_terbaru(): void
     {
-        foreach (range(1, 5) as $i) {
+        foreach (range(1, 7) as $i) {
             $this->wisata("Unggulan {$i}", ['unggulan' => true]);
             $this->berita("Berita {$i}", $i);
         }
 
         Livewire::test(Beranda::class)
             ->assertViewHas('unggulan', fn ($u) => $u->count() === 4)
-            ->assertViewHas('berita', fn ($b) => $b->pluck('judul')->all() === ['Berita 1', 'Berita 2', 'Berita 3', 'Berita 4']);
+            ->assertViewHas('berita', fn ($b) => $b->pluck('judul')->all() === ['Berita 1', 'Berita 2', 'Berita 3', 'Berita 4', 'Berita 5', 'Berita 6'])
+            // 2 terbaru jadi kartu utama, sisanya kartu biasa; setiap kartu punya "Selengkapnya".
+            ->assertSeeHtmlInOrder(['news-utama', 'Berita 1', 'Berita 2', 'class="news"', 'Berita 3'])
+            ->assertSee('Selengkapnya');
     }
 
     public function test_pita_statistik_kunjungan_dari_database(): void

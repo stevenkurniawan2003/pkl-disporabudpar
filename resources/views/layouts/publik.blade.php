@@ -27,7 +27,7 @@
     $ada = fn ($nama) => \Illuminate\Support\Facades\Route::has($nama);
     $aktif = fn ($nama) => request()->routeIs($nama, $nama.'.*', ...($aktifJuga[$nama] ?? []));
     $angka = fn ($n) => number_format((int) $n, 0, ',', '.');
-    $sosmed = array_values(array_filter($situs['media_sosial'], fn ($s) => filled($s['url'])));
+    $sosmed = $situs['media_sosial'];
 @endphp
 <!doctype html>
 <html lang="id"><head><meta charset="utf-8">
@@ -85,13 +85,16 @@
                 </a>
                 <p class="f-nama">{{ $situs['nama_dinas'] }}</p>
                 <p>{{ $situs['deskripsi'] }}</p>
-                @if ($sosmed)
-                    <div class="sosmed">
-                        @foreach ($sosmed as $s)
+                {{-- Ikon sosmed selalu tampil di bawah deskripsi. URL diisi lewat .env (SITE_INSTAGRAM, dst.). --}}
+                <div class="sosmed" aria-label="Media sosial">
+                    @foreach ($sosmed as $s)
+                        @if (filled($s['url']))
                             <a href="{{ $s['url'] }}" target="_blank" rel="noopener noreferrer" aria-label="Disporabudpar Jember di {{ $s['nama'] }}" title="{{ $s['nama'] }}"><i class="bi bi-{{ $s['ikon'] }}" aria-hidden="true"></i></a>
-                        @endforeach
-                    </div>
-                @endif
+                        @else
+                            <span title="{{ $s['nama'] }}" aria-label="{{ $s['nama'] }}"><i class="bi bi-{{ $s['ikon'] }}" aria-hidden="true"></i></span>
+                        @endif
+                    @endforeach
+                </div>
             </div>
 
             {{-- Kolom 2: tautan cepat --}}
@@ -165,12 +168,46 @@
             return;
         }
 
+        // Lightbox galeri (partials/lightbox): klik foto kecil, tombol panah/tutup, atau klik latar.
+        var kecil = t.closest('.dd-foto');
+        if (kecil) { lightbox(parseInt(kecil.getAttribute('data-i'), 10) || 0); return; }
+        var lb = document.getElementById('lightbox');
+        var lbTombol = t.closest('.lb-btn');
+        if (lb && lbTombol) {
+            var aksi = lbTombol.getAttribute('data-aksi');
+            if (aksi === 'tutup') lb.close(); else lightbox(lbPosisi + (aksi === 'kanan' ? 1 : -1));
+            return;
+        }
+        if (lb && t === lb) { lb.close(); return; }
+
         var dot = t.closest('.dots button');
         if (dot) { pindah(parseInt(dot.getAttribute('data-s'), 10) || 0); return; }
 
         var tombol = t.closest('.ni > button.nb');
         q('.ni.open').forEach(function (n) { if (!tombol || n !== tombol.parentNode) n.classList.remove('open'); });
         if (tombol) tombol.parentNode.classList.toggle('open');
+    });
+
+    var lbPosisi = 0;
+    function lightbox(i) {
+        var lb = document.getElementById('lightbox');
+        if (!lb) return;
+        var foto = JSON.parse(lb.getAttribute('data-foto') || '[]');
+        if (!foto.length) return;
+        lbPosisi = ((i % foto.length) + foto.length) % foto.length;
+        var f = foto[lbPosisi];
+        var img = document.getElementById('lb-img');
+        img.src = f.url;
+        img.alt = f.keterangan || ('Foto ' + (lbPosisi + 1) + ' ' + lb.getAttribute('data-nama'));
+        document.getElementById('lb-ket').textContent = f.keterangan || '';
+        document.getElementById('lb-no').textContent = (lbPosisi + 1) + ' / ' + foto.length;
+        if (!lb.open) lb.showModal();
+    }
+    document.addEventListener('keydown', function (e) {
+        var lb = document.getElementById('lightbox');
+        if (!lb || !lb.open) return;
+        if (e.key === 'ArrowRight') lightbox(lbPosisi + 1);
+        if (e.key === 'ArrowLeft') lightbox(lbPosisi - 1);
     });
 
     // Tutup menu setelah pindah halaman

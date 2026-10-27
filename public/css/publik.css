@@ -1,7 +1,8 @@
 
 :root{--bg:#fff;--bg2:#FBF7F9;--ink:#2A1F25;--mut:#7B6B73;--line:#F0E4E9;--pink:#E8487F;--pink2:#FDECF2;--pink3:#F7B9D0;--pinkink:#B0245A;--onpink:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 
-:root[data-theme="dark"]{--bg:#1C1519;--bg2:#241B20;--ink:#F6EDF1;--mut:#B3A0A9;--line:#3A2C33;--pink:#F06A9A;--pink2:#3A1F2B;--pink3:#7A3A53;--pinkink:#FFB3CD}
+/* Tema gelap: warna dasar hitam murni (#000), kebalikan putih murni (#fff) di tema terang. */
+:root[data-theme="dark"]{--bg:#000000;--bg2:#121212;--ink:#F5F5F5;--mut:#A3A3A3;--line:#2A2A2A;--pink:#F06A9A;--pink2:#2A1520;--pink3:#7A3A53;--pinkink:#FFB3CD}
 *{box-sizing:border-box}html,body{margin:0}html{scroll-padding-top:70px}
 body{background:var(--bg);color:var(--ink);font:15px/1.6 "Plus Jakarta Sans",system-ui,sans-serif}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
@@ -273,3 +274,35 @@ td a{color:var(--pinkink);font-weight:600}
 /* Beranda */
 .sh-link{margin-left:auto;color:var(--pinkink);font-weight:700}
 .sl .sl-judul{font-size:clamp(26px,4.4vw,44px);line-height:1.1;margin:0 0 10px;max-width:560px;font-weight:800;position:relative}
+/* Teks kaya dari editor admin (narasi wisata/hotel, isi berita) */
+.isi-kaya{line-height:1.75;overflow-wrap:anywhere}
+.isi-kaya p{margin:0 0 14px}
+.isi-kaya h2,.isi-kaya h3,.isi-kaya h4{margin:22px 0 8px;line-height:1.3}
+.isi-kaya ul,.isi-kaya ol{margin:0 0 14px;padding-left:22px}
+.isi-kaya li{margin-bottom:4px}
+.isi-kaya blockquote{margin:0 0 14px;padding:8px 16px;border-left:4px solid var(--pink);background:var(--bg2);border-radius:0 10px 10px 0;color:var(--mut)}
+.isi-kaya a{color:var(--pinkink);font-weight:600;text-decoration:underline}
+/* Footer: ikon sosmed yang belum punya URL */
+.sosmed span{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line);color:var(--mut);font-size:17px}
+/* Kartu berita: tombol Selengkapnya + kartu utama (2 berita terbaru di beranda) */
+a.c.kartu-berita{display:flex;flex-direction:column}
+.kartu-berita .cb{display:flex;flex-direction:column;flex:1}
+.kartu-berita .cb .bd{align-self:flex-start}
+.selengkapnya{margin-top:auto;padding-top:12px;color:var(--pinkink);font-weight:700;font-size:14px;display:inline-flex;align-items:center;gap:6px}
+.kartu-berita:hover .selengkapnya i{transform:translateX(3px)}
+.selengkapnya i{transition:transform .15s}
+.news-utama{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.kartu-berita.utama .ph{height:240px;font-size:48px}
+.kartu-berita.utama .cb b{font-size:20px;line-height:1.3}
+@media(max-width:760px){.news-utama{grid-template-columns:1fr}.kartu-berita.utama .ph{height:190px}}
+/* Pagination bernomor (halaman Berita) */
+.pgn-publik{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-top:24px}
+.pg-btn{min-width:40px;height:40px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);display:inline-grid;place-items:center;font-weight:700;color:var(--ink);cursor:pointer}
+.pg-btn:hover:not(.on):not(.off):not(.titik){border-color:var(--pink);color:var(--pinkink)}
+.pg-btn.on{background:var(--pink);border-color:var(--pink);color:var(--onpink);cursor:default}
+.pg-btn.off{opacity:.4;cursor:not-allowed}
+.pg-btn.titik{border-color:transparent;cursor:default;color:var(--mut)}
+.pg-info{text-align:center;color:var(--mut);font-size:13px;margin:10px 0 0}
+/* Mini galeri di detail berita */
+.mini-galeri{margin-top:26px}
+.mini-galeri h2 small{color:var(--mut);font-weight:500;font-size:14px}

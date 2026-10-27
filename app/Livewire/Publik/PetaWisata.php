@@ -5,8 +5,8 @@ namespace App\Livewire\Publik;
 use App\Models\Hotel;
 use App\Models\KategoriWisata;
 use App\Models\Wisata;
+use App\Support\TeksKaya;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -103,7 +103,7 @@ class PetaWisata extends Component
             'label' => $w->kategori?->nama ?? 'Wisata',
             'gambar' => $w->gambar_url,
             'ikon' => $w->kategori?->ikon ?? '📍',
-            'teks' => Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($w->narasi ?: (string) $w->deskripsi_singkat))), 140),
+            'teks' => TeksKaya::polos($w->narasi ?: (string) $w->deskripsi_singkat, 140),
             'url' => route('publik.detail-wisata', $w),
         ]);
 

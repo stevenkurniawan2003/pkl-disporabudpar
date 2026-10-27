@@ -56,6 +56,47 @@
     <main>{{ $slot }}</main>
 </div>
 
+<script data-navigate-once>
+// Editor teks kaya (TinyMCE) untuk komponen admin.editor. Isi editor dikirim ke properti Livewire tanpa request
+// (live = false), lalu ikut terkirim saat tombol Simpan ditekan.
+document.addEventListener('alpine:init', function () {
+    Alpine.data('editorKaya', function (properti) {
+        return {
+            editor: null,
+            init: function () {
+                var self = this;
+                var gelap = document.documentElement.getAttribute('data-theme') === 'dark';
+                if (!window.tinymce) return;
+                tinymce.init({
+                    target: this.$refs.area,
+                    license_key: 'gpl',
+                    menubar: false,
+                    branding: false,
+                    promotion: false,
+                    elementpath: false,
+                    height: 320,
+                    plugins: 'lists link autolink wordcount',
+                    toolbar: 'undo redo | blocks | bold italic underline strikethrough | bullist numlist blockquote | link | removeformat',
+                    block_formats: 'Paragraf=p; Judul 2=h2; Judul 3=h3; Judul 4=h4',
+                    link_default_target: '_blank',
+                    link_target_list: false,
+                    skin: gelap ? 'oxide-dark' : 'oxide',
+                    content_css: gelap ? 'dark' : 'default',
+                    content_style: 'body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-size:14px;line-height:1.6}',
+                    setup: function (ed) {
+                        self.editor = ed;
+                        ed.on('init', function () { ed.setContent(self.$wire.get(properti) || ''); });
+                        ed.on('change input undo redo', function () { self.$wire.set(properti, ed.getContent(), false); });
+                    },
+                });
+            },
+            destroy: function () {
+                if (this.editor) this.editor.remove();
+            },
+        };
+    });
+});
+</script>
 @livewireScripts
 <script data-navigate-once>
 (function () {

@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use App\Support\TeksKaya;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
 
 class Berita extends Model
 {
@@ -35,6 +36,12 @@ class Berita extends Model
     public function penulis(): BelongsTo
     {
         return $this->belongsTo(User::class, 'penulis_id');
+    }
+
+    /** Mini galeri foto. Gambar sampul tetap disimpan di kolom gambar_sampul. */
+    public function galeri(): HasMany
+    {
+        return $this->hasMany(GaleriBerita::class, 'berita_id')->orderBy('id_galeri_berita');
     }
 
     /** Tampil di publik: status terbit DAN tanggal terbitnya sudah tiba (tanggal depan = terjadwal). */
@@ -79,19 +86,15 @@ class Berita extends Model
         return $this->tanggal_terbit?->locale('id')->translatedFormat('j F Y') ?? '';
     }
 
-    /** Ringkasan dari admin; kalau kosong, cuplikan ±150 karakter dari isi tanpa tag HTML. */
+    /** Cuplikan ±150 karakter langsung dari isi berita (tanpa tag HTML). Kolom ringkasan tidak dipakai lagi. */
     public function getRingkasanTampilAttribute(): string
     {
-        return $this->ringkasan
-            ?: Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags($this->isi))), 150);
+        return TeksKaya::polos($this->isi, 150);
     }
 
-    /** Isi berita dipecah per paragraf (baris kosong). Tampilkan dengan e() supaya aman dari XSS. */
-    public function getParagrafAttribute(): array
+    /** Isi berita sebagai HTML yang sudah dibersihkan (lihat TeksKaya), aman ditampilkan dengan {!! !!}. */
+    public function getIsiHtmlAttribute(): string
     {
-        return array_values(array_filter(
-            array_map('trim', preg_split('/\R{2,}/', (string) $this->isi)),
-            fn ($p) => $p !== ''
-        ));
+        return TeksKaya::html($this->isi);
     }
 }

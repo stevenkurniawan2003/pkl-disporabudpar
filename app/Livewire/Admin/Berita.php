@@ -109,7 +109,7 @@ class Berita extends Component
 
         return view('livewire.admin.berita', [
             'daftar' => $daftar,
-            'detail' => $this->detailId ? BeritaModel::with(['kategori', 'penulis'])->find($this->detailId) : null,
+            'detail' => $this->detailId ? BeritaModel::with(['kategori', 'penulis', 'galeri'])->find($this->detailId) : null,
         ]);
     }
 }

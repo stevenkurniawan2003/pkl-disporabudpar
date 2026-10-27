@@ -6,6 +6,7 @@ use App\Models\GaleriWisata;
 use App\Models\KategoriWisata;
 use App\Models\Kecamatan;
 use App\Models\Wisata;
+use App\Support\TeksKaya;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -80,7 +81,7 @@ class WisataForm extends Component
             $this->kategori_id = $wisata->kategori_id;
             $this->kecamatan_id = $wisata->kecamatan_id;
             $this->deskripsi_singkat = (string) $wisata->deskripsi_singkat;
-            $this->narasi = (string) $wisata->narasi;
+            $this->narasi = TeksKaya::html($wisata->narasi);
             $this->alamat = $wisata->alamat;
             $this->latitude = (string) $wisata->latitude;
             $this->longitude = (string) $wisata->longitude;
@@ -117,7 +118,7 @@ class WisataForm extends Component
             'kategori_id' => ['required', 'exists:kategori_wisata,id'],
             'kecamatan_id' => ['required', 'exists:kecamatan,id'],
             'deskripsi_singkat' => ['required', 'string', 'max:200'],
-            'narasi' => ['nullable', 'string', 'max:5000'],
+            'narasi' => ['nullable', 'string', 'max:20000'],
             'alamat' => ['required', 'string', 'max:255'],
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
@@ -225,6 +226,11 @@ class WisataForm extends Component
         $this->longitude = str_replace(',', '.', trim($this->longitude));
         $this->link_google_maps = $this->rapikanLink($this->link_google_maps);
 
+        // Editor mengirim "<p></p>" kalau isinya dihapus semua: anggap kosong.
+        if (TeksKaya::kosong($this->narasi)) {
+            $this->narasi = '';
+        }
+
         $data = $this->validate();
 
         if ($this->jumlahGaleri() > self::MAKS_GALERI) {
@@ -238,7 +244,7 @@ class WisataForm extends Component
             'kecamatan_id' => $data['kecamatan_id'],
             'nama' => trim($data['nama']),
             'deskripsi_singkat' => trim($data['deskripsi_singkat']),
-            'narasi' => $data['narasi'] !== '' ? $data['narasi'] : null,
+            'narasi' => $data['narasi'] !== '' ? TeksKaya::html($data['narasi']) : null,
             'alamat' => trim($data['alamat']),
             'latitude' => $data['latitude'],
             'longitude' => $data['longitude'],

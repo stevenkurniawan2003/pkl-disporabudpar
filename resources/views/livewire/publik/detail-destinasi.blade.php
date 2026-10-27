@@ -1,6 +1,7 @@
 {{-- Dipakai bersama oleh DetailWisata dan DetailHotel. --}}
 @php
-    $paragraf = array_values(array_filter(array_map('trim', preg_split('/\R{2,}/', (string) $narasi)), fn ($p) => $p !== ''));
+    // Narasi dari editor admin (TinyMCE), sudah dibersihkan HTML Purifier. Data lama berupa teks biasa jadi paragraf.
+    $narasiHtml = \App\Support\TeksKaya::html($narasi);
     $adaPeta = \App\Livewire\Publik\PetaWisata::koordinatValid($lat, $lng);
     $kembali = route('publik.peta-wisata', $jenis === 'hotel' ? ['tampil' => 'hotel'] : []);
 @endphp
@@ -27,11 +28,11 @@
             @endif
 
             <h2>Tentang {{ $jenis === 'hotel' ? 'hotel' : 'wisata' }} ini</h2>
-            @forelse ($paragraf as $p)
-                <p>{!! nl2br(e($p)) !!}</p>
-            @empty
+            @if (\App\Support\TeksKaya::kosong($narasiHtml))
                 <p class="meta">Belum ada deskripsi.</p>
-            @endforelse
+            @else
+                <div class="isi-kaya">{!! $narasiHtml !!}</div>
+            @endif
 
             @if ($galeri)
                 <h2>Galeri foto <small>({{ count($galeri) }})</small></h2>
@@ -68,17 +69,7 @@
     </div>
 
     @if ($galeri)
-        <dialog class="lightbox" id="lightbox" aria-label="Galeri foto {{ $nama }}">
-            <figure>
-                <img id="lb-img" src="" alt="">
-                <figcaption><span id="lb-ket"></span><span id="lb-no" class="lb-no"></span></figcaption>
-            </figure>
-            <button type="button" class="lb-btn lb-tutup" data-aksi="tutup" aria-label="Tutup galeri"><i class="bi bi-x-lg"></i></button>
-            @if (count($galeri) > 1)
-                <button type="button" class="lb-btn lb-kiri" data-aksi="kiri" aria-label="Foto sebelumnya"><i class="bi bi-chevron-left"></i></button>
-                <button type="button" class="lb-btn lb-kanan" data-aksi="kanan" aria-label="Foto berikutnya"><i class="bi bi-chevron-right"></i></button>
-            @endif
-        </dialog>
+        @include('livewire.publik.partials.lightbox')
     @endif
 </div>
 
@@ -110,44 +101,6 @@
             }),
         }).addTo(peta);
         setTimeout(() => peta.invalidateSize(), 150);
-    }
-
-    // Lightbox galeri: klik foto, panah kiri/kanan (tombol & keyboard), Esc atau klik latar untuk menutup.
-    const kotak = document.getElementById('lightbox');
-    if (kotak) {
-        const foto = @js($galeri);
-        const img = document.getElementById('lb-img');
-        const ket = document.getElementById('lb-ket');
-        const no = document.getElementById('lb-no');
-        let posisi = 0;
-
-        const tampil = (i) => {
-            posisi = (i + foto.length) % foto.length;
-            img.src = foto[posisi].url;
-            img.alt = foto[posisi].keterangan || ('Foto ' + (posisi + 1) + ' ' + @js($nama));
-            ket.textContent = foto[posisi].keterangan || '';
-            no.textContent = (posisi + 1) + ' / ' + foto.length;
-        };
-
-        $wire.$el.addEventListener('click', (e) => {
-            const kecil = e.target.closest('.dd-foto');
-            if (kecil) { tampil(parseInt(kecil.dataset.i, 10)); kotak.showModal(); return; }
-
-            const tombol = e.target.closest('.lb-btn');
-            if (tombol) {
-                const aksi = tombol.dataset.aksi;
-                if (aksi === 'tutup') kotak.close();
-                else tampil(posisi + (aksi === 'kanan' ? 1 : -1));
-                return;
-            }
-
-            if (e.target === kotak) kotak.close(); // klik di luar foto
-        });
-
-        kotak.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowRight') tampil(posisi + 1);
-            if (e.key === 'ArrowLeft') tampil(posisi - 1);
-        });
     }
 </script>
 @endscript

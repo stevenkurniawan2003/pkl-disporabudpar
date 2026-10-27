@@ -39,7 +39,16 @@
     let w = warna();
     let seriAktif = 'semua';
 
-    const seri = (label, nilai, kunci, align) => ({
+    // Label garis bawah ditaruh di bawah titik, kecuali titiknya terlalu dekat sumbu X:
+    // dipindah ke atas supaya tidak menabrak sumbu dan nama bulan.
+    const posisiLabel = (atas) => (ctx) => {
+        if (atas) return 'top';
+        const y = ctx.chart.scales.y;
+        const nilai = ctx.dataset.data[ctx.dataIndex];
+        return (nilai - y.min) / ((y.max - y.min) || 1) < 0.18 ? 'top' : 'bottom';
+    };
+
+    const seri = (label, nilai, kunci, atas) => ({
         label,
         data: nilai,
         borderColor: w[kunci],
@@ -51,14 +60,14 @@
         pointBorderWidth: 2,
         tension: 0.25,
         hidden: seriAktif !== 'semua' && seriAktif !== kunci,
-        datalabels: { align, anchor: align === 'top' ? 'end' : 'start' },
+        datalabels: { align: posisiLabel(atas), anchor: (ctx) => posisiLabel(atas)(ctx) === 'top' ? 'end' : 'start' },
     });
 
     const buatData = (d) => ({
         labels: d.label,
         datasets: [
-            seri('Domestik', d.domestik, 'domestik', 'top'),
-            seri('Mancanegara', d.mancanegara, 'mancanegara', 'bottom'),
+            seri('Domestik', d.domestik, 'domestik', true),
+            seri('Mancanegara', d.mancanegara, 'mancanegara', false),
         ],
     });
 
@@ -69,7 +78,7 @@
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            layout: { padding: { top: 22, right: 12, bottom: 4, left: 4 } },
+            layout: { padding: { top: 22, right: 12, bottom: 8, left: 4 } },
             interaction: { mode: 'index', intersect: false },
             plugins: {
                 legend: { position: 'top', align: 'start', onClick: null, labels: { color: w.teks, usePointStyle: true, pointStyle: 'line', boxWidth: 18, font: { family: 'Plus Jakarta Sans' } } },
@@ -78,8 +87,8 @@
                 datalabels: { color: w.redup, offset: 4, clamp: true, display: 'auto', formatter: (n) => angka(n), font: { size: 10, weight: '600', family: 'Plus Jakarta Sans' } },
             },
             scales: {
-                x: { grid: { display: false }, border: { color: w.garis }, ticks: { color: w.redup } },
-                y: { beginAtZero: true, grace: '10%', grid: { color: w.garis }, border: { display: false }, ticks: { color: w.redup, precision: 0, callback: (n) => angka(n) } },
+                x: { grid: { display: false }, border: { color: w.garis }, ticks: { color: w.redup, padding: 8 } },
+                y: { beginAtZero: true, grace: '15%', grid: { color: w.garis }, border: { display: false }, ticks: { color: w.redup, precision: 0, callback: (n) => angka(n) } },
             },
         },
     });

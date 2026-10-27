@@ -116,14 +116,25 @@
                             @endif
                         </p>
                     </div>
-                    <div class="info full"><small>Ringkasan</small><p>{{ $detail->ringkasan_tampil ?: '–' }}</p></div>
                     <div class="info full">
                         <small>Isi berita</small>
-                        <div class="isi-berita">
-                            @foreach ($detail->paragraf as $p)
-                                <p>{!! nl2br(e($p)) !!}</p>
-                            @endforeach
-                        </div>
+                        {{-- isi_html sudah dibersihkan HTML Purifier (lihat App\Support\TeksKaya). --}}
+                        <div class="isi-berita isi-kaya">{!! $detail->isi_html !!}</div>
+                    </div>
+
+                    <div class="info full">
+                        <small>Galeri ({{ $detail->galeri->count() }} foto)</small>
+                        @if ($detail->galeri->isNotEmpty())
+                            <div class="galeri">
+                                @foreach ($detail->galeri as $g)
+                                    <a class="galeri-item" href="{{ $g->gambar_url }}" target="_blank" rel="noopener" wire:key="detail-galeri-{{ $g->id_galeri_berita }}">
+                                        <img src="{{ $g->gambar_url }}" alt="Foto galeri {{ $detail->judul }}" loading="lazy">
+                                    </a>
+                                @endforeach
+                            </div>
+                        @else
+                            <p>Belum ada foto galeri.</p>
+                        @endif
                     </div>
                 </div>
 

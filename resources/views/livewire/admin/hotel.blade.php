@@ -74,7 +74,7 @@
 
                     <div class="info full"><small>Nama hotel</small><b>{{ $detail->nama_hotel }}</b></div>
                     <div class="info full"><small>Deskripsi singkat</small><p>{{ $detail->deskripsi_singkat }}</p></div>
-                    <div class="info full"><small>Narasi</small><p>{!! nl2br(e($detail->narasi)) !!}</p></div>
+                    <div class="info full"><small>Narasi</small><div class="isi-kaya">{!! \App\Support\TeksKaya::html($detail->narasi) !!}</div></div>
                     <div class="info full"><small>Alamat</small><p>{{ $detail->alamat }}</p></div>
                     <div class="info"><small>Titik koordinat</small><p>{{ $detail->latitude }}, {{ $detail->longitude }}</p></div>
                     <div class="info"><small>Nomor telepon</small><p>{{ $detail->no_telepon ?? '–' }}</p></div>

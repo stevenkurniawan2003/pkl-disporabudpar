@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\GaleriHotel;
 use App\Models\Hotel;
+use App\Support\TeksKaya;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -70,7 +71,7 @@ class HotelForm extends Component
             $this->hotelId = $hotel->id_hotel;
             $this->nama_hotel = $hotel->nama_hotel;
             $this->deskripsi_singkat = $hotel->deskripsi_singkat;
-            $this->narasi = $hotel->narasi;
+            $this->narasi = TeksKaya::html($hotel->narasi);
             $this->alamat = $hotel->alamat;
             $this->latitude = (string) $hotel->latitude;
             $this->longitude = (string) $hotel->longitude;
@@ -104,7 +105,7 @@ class HotelForm extends Component
         return [
             'nama_hotel' => ['required', 'string', 'max:150'],
             'deskripsi_singkat' => ['required', 'string', 'max:200'],
-            'narasi' => ['required', 'string', 'max:5000'],
+            'narasi' => ['required', 'string', 'max:20000'],
             'alamat' => ['required', 'string', 'max:255'],
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
@@ -208,6 +209,11 @@ class HotelForm extends Component
         $this->link_google_maps = $this->rapikanLink($this->link_google_maps);
         $this->link_website = $this->rapikanLink($this->link_website);
 
+        // Editor mengirim "<p></p>" kalau isinya dihapus semua: anggap kosong.
+        if (TeksKaya::kosong($this->narasi)) {
+            $this->narasi = '';
+        }
+
         $data = $this->validate();
 
         if ($this->jumlahGaleri() > self::MAKS_GALERI) {
@@ -219,7 +225,7 @@ class HotelForm extends Component
         $atribut = [
             'nama_hotel' => trim($data['nama_hotel']),
             'deskripsi_singkat' => trim($data['deskripsi_singkat']),
-            'narasi' => trim($data['narasi']),
+            'narasi' => TeksKaya::html($data['narasi']),
             'alamat' => trim($data['alamat']),
             'latitude' => $data['latitude'],
             'longitude' => $data['longitude'],

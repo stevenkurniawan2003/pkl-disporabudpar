@@ -101,7 +101,7 @@
                     <div class="info"><small>Status</small><p>{{ $detail->status === 'tayang' ? 'Tayang (tampil di publik)' : 'Draf (disembunyikan)' }}</p></div>
                     <div class="info"><small>Unggulan</small><p>{{ $detail->unggulan ? 'Ya, tampil di beranda' : 'Tidak' }}</p></div>
                     <div class="info full"><small>Deskripsi singkat</small><p>{{ $detail->deskripsi_singkat ?: '–' }}</p></div>
-                    <div class="info full"><small>Narasi</small><p>{!! $detail->narasi ? nl2br(e($detail->narasi)) : '–' !!}</p></div>
+                    <div class="info full"><small>Narasi</small>@if (\App\Support\TeksKaya::kosong($detail->narasi))<p>–</p>@else<div class="isi-kaya">{!! \App\Support\TeksKaya::html($detail->narasi) !!}</div>@endif</div>
                     <div class="info full"><small>Alamat</small><p>{{ $detail->alamat }}, Kec. {{ $detail->kecamatan?->nama }}</p></div>
                     <div class="info"><small>Titik koordinat</small><p>{{ $detail->latitude }}, {{ $detail->longitude }}</p></div>
                     <div class="info">

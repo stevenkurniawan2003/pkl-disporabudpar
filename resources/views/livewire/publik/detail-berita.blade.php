@@ -16,10 +16,22 @@
 
         <div class="ph" style="background:{{ $berita->gambar_url ? 'url('.$berita->gambar_url.') center/cover no-repeat' : $berita->gradien }}" @if ($berita->gambar_url) role="img" aria-label="Gambar sampul: {{ $berita->judul }}" @endif>@unless ($berita->gambar_url)📰@endunless</div>
 
-        {{-- Admin menulis isi sebagai teks biasa (bukan rich text), jadi isi di-escape. --}}
-        @foreach ($berita->paragraf as $p)
-            <p>{!! nl2br(e($p)) !!}</p>
-        @endforeach
+        {{-- Isi dari editor admin (TinyMCE), sudah dibersihkan HTML Purifier (lihat App\Support\TeksKaya). --}}
+        <div class="isi-kaya">{!! $berita->isi_html !!}</div>
+
+        @if ($galeri)
+            <section class="mini-galeri" aria-labelledby="judul-mini-galeri">
+                <h2 id="judul-mini-galeri">Galeri foto <small>({{ count($galeri) }})</small></h2>
+                <div class="dd-galeri">
+                    @foreach ($galeri as $i => $foto)
+                        <button type="button" class="dd-foto" data-i="{{ $i }}" aria-label="Lihat foto {{ $i + 1 }}">
+                            <img src="{{ $foto['url'] }}" alt="Foto {{ $i + 1 }} {{ $berita->judul }}" loading="lazy">
+                        </button>
+                    @endforeach
+                </div>
+            </section>
+            @include('livewire.publik.partials.lightbox', ['nama' => $berita->judul])
+        @endif
     </article>
 
     @if ($lainnya->isNotEmpty())

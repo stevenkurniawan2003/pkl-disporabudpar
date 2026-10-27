@@ -2,7 +2,7 @@
 
 /*
 | Isi footer situs publik. Ubah di sini (atau lewat .env) tanpa menyentuh tampilan.
-| Media sosial dengan URL kosong tidak ditampilkan.
+| Ikon media sosial selalu tampil di footer; yang URL-nya kosong tampil tanpa tautan.
 */
 
 return [

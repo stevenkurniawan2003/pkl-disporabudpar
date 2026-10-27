@@ -3,8 +3,11 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Berita;
+use App\Models\GaleriBerita;
 use App\Models\KategoriBerita;
+use App\Support\TeksKaya;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
@@ -19,6 +22,11 @@ class BeritaForm extends Component
 {
     use WithFileUploads;
 
+    /** Batas foto mini galeri per berita (tidak termasuk gambar sampul). */
+    public const MAKS_GALERI = 10;
+
+    private const ATURAN_GAMBAR = ['image', 'mimes:jpg,jpeg,png,webp', 'max:2048'];
+
     public bool $terbuka = false;
 
     public ?int $beritaId = null;
@@ -31,13 +39,20 @@ class BeritaForm extends Component
 
     public string $status = 'terbit';
 
-    public string $ringkasan = '';
-
     public string $isi = '';
 
     public ?string $gambarLama = null;
 
     public $gambarBaru = null;
+
+    /** Foto galeri yang sudah tersimpan: [['id', 'gambar', 'hapus'], ...]. */
+    public array $galeri = [];
+
+    /** Penampung input file (bisa pilih banyak). Isinya dipindah ke $galeriBaru setiap kali memilih. */
+    public array $unggahGaleri = [];
+
+    /** Foto galeri baru yang belum disimpan. */
+    public array $galeriBaru = [];
 
     #[On('buka-form-berita')]
     public function buka(?int $id = null): void
@@ -45,16 +60,20 @@ class BeritaForm extends Component
         $this->resetForm();
 
         if ($id) {
-            $berita = Berita::findOrFail($id);
+            $berita = Berita::with('galeri')->findOrFail($id);
 
             $this->beritaId = $berita->id;
             $this->judul = $berita->judul;
             $this->kategori_berita_id = $berita->kategori_berita_id;
             $this->tanggal = $berita->tanggal_terbit?->format('Y-m-d') ?? '';
             $this->status = $berita->status;
-            $this->ringkasan = (string) $berita->ringkasan;
-            $this->isi = $berita->isi;
+            $this->isi = TeksKaya::html($berita->isi);
             $this->gambarLama = $berita->gambar_sampul;
+            $this->galeri = $berita->galeri->map(fn (GaleriBerita $g) => [
+                'id' => $g->id_galeri_berita,
+                'gambar' => $g->gambar,
+                'hapus' => false,
+            ])->all();
         } else {
             $this->tanggal = now()->format('Y-m-d');
         }
@@ -80,9 +99,9 @@ class BeritaForm extends Component
             'kategori_berita_id' => ['required', 'exists:kategori_berita,id'],
             'tanggal' => ['nullable', 'date_format:Y-m-d'],
             'status' => ['required', 'in:terbit,draf'],
-            'ringkasan' => ['nullable', 'string', 'max:300'],
             'isi' => ['required', 'string', 'max:100000'],
-            'gambarBaru' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'gambarBaru' => ['nullable', ...self::ATURAN_GAMBAR],
+            'galeriBaru.*' => self::ATURAN_GAMBAR,
         ];
     }
 
@@ -106,15 +125,28 @@ class BeritaForm extends Component
             'kategori_berita_id' => 'Kategori',
             'tanggal' => 'Tanggal terbit',
             'status' => 'Status',
-            'ringkasan' => 'Ringkasan',
             'isi' => 'Isi berita',
             'gambarBaru' => 'Gambar sampul',
+            'unggahGaleri.*' => 'Foto galeri',
+            'galeriBaru.*' => 'Foto galeri',
         ];
     }
 
     public function simpan(): void
     {
+        // Editor mengirim "<p></p>" kalau isinya dihapus semua: anggap kosong.
+        if (TeksKaya::kosong($this->isi)) {
+            $this->isi = '';
+        }
+
         $data = $this->validate();
+
+        if ($this->jumlahGaleri() > self::MAKS_GALERI) {
+            $this->addError('unggahGaleri', 'Galeri maksimal '.self::MAKS_GALERI.' foto. Hapus sebagian foto dulu.');
+
+            return;
+        }
+
         $berita = $this->beritaId ? Berita::find($this->beritaId) : null;
 
         if ($this->beritaId && ! $berita) {
@@ -138,48 +170,69 @@ class BeritaForm extends Component
         $atribut = [
             'kategori_berita_id' => $data['kategori_berita_id'],
             'judul' => trim($data['judul']),
-            'ringkasan' => ($data['ringkasan'] ?? '') !== '' ? trim($data['ringkasan']) : null,
-            'isi' => $data['isi'],
+            'isi' => TeksKaya::html($data['isi']),
             'status' => $data['status'],
             'tanggal_terbit' => $tanggalTerbit,
         ];
 
-        $fileBaru = null;
-        $fileDibuang = null;
+        // File yang baru diunggah (dibersihkan lagi kalau penyimpanan gagal) dan file lama yang dibuang.
+        $fileBaru = [];
+        $fileDibuang = [];
+        $aksi = $berita ? 'diperbarui' : 'disimpan';
 
         try {
             if ($this->gambarBaru) {
-                $atribut['gambar_sampul'] = $fileBaru = $this->gambarBaru->store('berita', 'public');
+                $atribut['gambar_sampul'] = $fileBaru[] = $this->gambarBaru->store('berita', 'public');
             }
 
-            if ($berita) {
-                if ($fileBaru && $berita->gambar_sampul) {
-                    $fileDibuang = $berita->gambar_sampul;
+            $berita = DB::transaction(function () use ($berita, $atribut, &$fileBaru, &$fileDibuang) {
+                if ($berita) {
+                    if (isset($atribut['gambar_sampul']) && $berita->gambar_sampul) {
+                        $fileDibuang[] = $berita->gambar_sampul;
+                    }
+
+                    $berita->update($atribut);
+                } else {
+                    $atribut['slug'] = $this->buatSlug($atribut['judul']);
+                    $atribut['penulis_id'] = auth()->id();
+
+                    $berita = Berita::create($atribut);
                 }
 
-                $berita->update($atribut);
-                $pesan = "Berita \"{$berita->judul}\" diperbarui.";
-            } else {
-                $atribut['slug'] = $this->buatSlug($atribut['judul']);
-                $atribut['penulis_id'] = auth()->id();
+                foreach ($this->galeri as $foto) {
+                    if (! $foto['hapus']) {
+                        continue;
+                    }
 
-                $berita = Berita::create($atribut);
-                $pesan = "Berita \"{$berita->judul}\" disimpan.";
-            }
+                    $baris = GaleriBerita::where('berita_id', $berita->id)->find($foto['id']);
+
+                    if ($baris) {
+                        $fileDibuang[] = $baris->gambar;
+                        $baris->delete();
+                    }
+                }
+
+                foreach ($this->galeriBaru as $file) {
+                    GaleriBerita::create([
+                        'berita_id' => $berita->id,
+                        'gambar' => $fileBaru[] = $file->store('berita/galeri', 'public'),
+                    ]);
+                }
+
+                return $berita;
+            });
         } catch (\Throwable $e) {
             report($e);
-            if ($fileBaru) {
-                Storage::disk('public')->delete($fileBaru);
-            }
+            Storage::disk('public')->delete($fileBaru);
             $this->addError('simpan', 'Berita gagal disimpan. Silakan coba lagi.');
 
             return;
         }
 
-        // Gambar lama baru dihapus setelah data pasti tersimpan.
-        if ($fileDibuang) {
-            Storage::disk('public')->delete($fileDibuang);
-        }
+        // File lama baru dihapus setelah data pasti tersimpan.
+        Storage::disk('public')->delete($fileDibuang);
+
+        $pesan = "Berita \"{$berita->judul}\" {$aksi}.";
 
         if ($berita->status === 'draf') {
             $pesan .= ' Status masih draf, belum tampil di publik.';
@@ -195,6 +248,50 @@ class BeritaForm extends Component
     public function updatedGambarBaru(): void
     {
         $this->validateOnly('gambarBaru');
+    }
+
+    /** Dipanggil Livewire setiap kali admin memilih file galeri: periksa, lalu tambahkan ke antrean. */
+    public function updatedUnggahGaleri(): void
+    {
+        try {
+            $this->validate(['unggahGaleri.*' => self::ATURAN_GAMBAR]);
+
+            $sisa = self::MAKS_GALERI - $this->jumlahGaleri();
+
+            if (count($this->unggahGaleri) > $sisa) {
+                $this->addError('unggahGaleri', 'Galeri maksimal '.self::MAKS_GALERI." foto. Sisa tempat: {$sisa} foto.");
+
+                return;
+            }
+
+            foreach ($this->unggahGaleri as $file) {
+                $this->galeriBaru[] = $file;
+            }
+        } finally {
+            $this->unggahGaleri = [];
+        }
+    }
+
+    /** Foto lama tidak langsung dihapus; baru dihapus saat tombol Simpan ditekan. */
+    public function tandaiHapusGaleri(int $i): void
+    {
+        if (isset($this->galeri[$i])) {
+            $this->galeri[$i]['hapus'] = ! $this->galeri[$i]['hapus'];
+        }
+    }
+
+    public function batalGaleriBaru(int $i): void
+    {
+        unset($this->galeriBaru[$i]);
+
+        $this->galeriBaru = array_values($this->galeriBaru);
+        $this->resetValidation('galeriBaru.*');
+    }
+
+    /** Jumlah foto galeri setelah disimpan nanti (foto lama yang tidak ditandai hapus + foto baru). */
+    private function jumlahGaleri(): int
+    {
+        return collect($this->galeri)->where('hapus', false)->count() + count($this->galeriBaru);
     }
 
     public function hapusGambar(): void
@@ -219,6 +316,7 @@ class BeritaForm extends Component
     {
         return view('livewire.admin.berita-form', [
             'daftarKategori' => $this->terbuka ? KategoriBerita::orderBy('nama')->get() : collect(),
+            'maksGaleri' => self::MAKS_GALERI,
         ]);
     }
 }

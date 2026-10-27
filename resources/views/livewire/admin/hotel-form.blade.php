@@ -1,6 +1,6 @@
 <div>
     @if ($terbuka)
-        <div class="ov on" x-on:keydown.escape.window="$wire.tutup()">
+        <div class="ov on" x-on:keydown.escape.window="if (! document.querySelector('.tox-dialog')) $wire.tutup()">
             <form wire:submit="simpan" class="md" role="dialog" aria-modal="true" aria-labelledby="judul-form-hotel">
                 <div class="mh">
                     <h2 id="judul-form-hotel">{{ $hotelId ? 'Ubah hotel' : 'Tambah hotel' }}</h2>
@@ -26,7 +26,7 @@
 
                     <div class="fd full">
                         <label for="narasi">Narasi</label>
-                        <textarea id="narasi" rows="4" wire:model="narasi" placeholder="Deskripsi lengkap hotel"></textarea>
+                        <x-admin.editor model="narasi" id="narasi" aria-label="Narasi" />
                         @error('narasi') <small class="err-msg">{{ $message }}</small> @enderror
                     </div>
 
@@ -137,3 +137,7 @@
         </div>
     @endif
 </div>
+
+@assets
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7.6.0/tinymce.min.js" referrerpolicy="origin"></script>
+@endassets

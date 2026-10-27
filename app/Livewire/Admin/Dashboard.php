@@ -9,6 +9,8 @@ use App\Models\Kesenian;
 use App\Models\KunjunganHotel;
 use App\Models\KunjunganWisata;
 use App\Models\Wisata;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -18,40 +20,49 @@ use Livewire\Component;
 #[Title('Dashboard · Admin Disporabudpar Jember')]
 class Dashboard extends Component
 {
+    /** Tahun grafik kunjungan wisata. Default tahun berjalan. */
+    #[Url(as: 'tahun_wisata', except: 0)]
+    public int $tahunWisata = 0;
+
     /** Tahun grafik kunjungan hotel. Default tahun berjalan. */
     #[Url(as: 'tahun', except: 0)]
     public int $tahun = 0;
 
     public function mount(): void
     {
-        $this->rapikanTahun();
+        $this->tahunWisata = $this->rapikanTahun($this->tahunWisata);
+        $this->tahun = $this->rapikanTahun($this->tahun);
     }
 
     /** Ganti tahun: kirim data baru ke grafik (canvas-nya wire:ignore, jadi tidak ikut dirender ulang). */
+    public function updatedTahunWisata(): void
+    {
+        $this->tahunWisata = $this->rapikanTahun($this->tahunWisata);
+        $this->dispatch('grafik-kunjungan-wisata', data: $this->dataGrafik(KunjunganWisata::query(), $this->tahunWisata));
+    }
+
     public function updatedTahun(): void
     {
-        $this->rapikanTahun();
-        $this->dispatch('grafik-kunjungan-hotel', data: $this->dataGrafik());
+        $this->tahun = $this->rapikanTahun($this->tahun);
+        $this->dispatch('grafik-kunjungan-hotel', data: $this->dataGrafik(KunjunganHotel::query(), $this->tahun));
     }
 
     /** Tahun kosong atau tidak masuk akal (misalnya dari URL) -> tahun berjalan. */
-    private function rapikanTahun(): void
+    private function rapikanTahun(int $tahun): int
     {
-        if ($this->tahun < 2000 || $this->tahun > now()->year) {
-            $this->tahun = now()->year;
-        }
+        return ($tahun < 2000 || $tahun > now()->year) ? now()->year : $tahun;
     }
 
     /**
-     * Jumlah tamu hotel per bulan untuk $tahun, dihitung di database (SUM ... GROUP BY bulan).
+     * Jumlah kunjungan per bulan untuk $tahun, dihitung di database (SUM ... GROUP BY bulan).
      * Bulan tanpa data bernilai 0.
      *
      * @return array{label: list<string>, domestik: list<int>, mancanegara: list<int>}
      */
-    private function dataGrafik(): array
+    private function dataGrafik(Builder $query, int $tahun): array
     {
-        $perBulan = KunjunganHotel::query()
-            ->where('tahun', $this->tahun)
+        $perBulan = $query
+            ->where('tahun', $tahun)
             ->selectRaw('bulan, SUM(domestik) AS domestik, SUM(mancanegara) AS mancanegara')
             ->groupBy('bulan')
             ->toBase()
@@ -69,18 +80,20 @@ class Dashboard extends Component
         return $data;
     }
 
-    public function render()
+    /** Pilihan tahun: tahun yang sudah punya data + tahun berjalan + tahun terpilih. */
+    private function daftarTahun(Builder $query, int $terpilih): Collection
     {
-        $grafik = $this->dataGrafik();
-
-        // Pilihan tahun: tahun yang sudah punya data kunjungan hotel + tahun berjalan.
-        $daftarTahun = KunjunganHotel::query()->distinct()->pluck('tahun')
+        return $query->distinct()->pluck('tahun')
             ->push(now()->year)
-            ->push($this->tahun)
+            ->push($terpilih)
+            ->map(fn ($t) => (int) $t)
             ->unique()
             ->sortDesc()
             ->values();
+    }
 
+    public function render()
+    {
         return view('livewire.admin.dashboard', [
             'jumlahWisata' => Wisata::count(),
             'jumlahUnggulan' => Wisata::unggulan()->count(),
@@ -89,8 +102,29 @@ class Dashboard extends Component
             'jumlahBeritaTerbit' => Berita::terbit()->count(),
             'jumlahKesenian' => Kesenian::count(),
             'jumlahEkraf' => Ekraf::count(),
-            'grafik' => $grafik,
-            'daftarTahun' => $daftarTahun,
+            // Kunci: nama properti tahun (wire:model), id canvas/event, judul, satuan tooltip, tahun, data, pilihan tahun, menu isian.
+            'daftarGrafik' => [
+                [
+                    'model' => 'tahunWisata',
+                    'kunci' => 'grafik-kunjungan-wisata',
+                    'judul' => 'Kunjungan wisata per bulan',
+                    'satuan' => 'wisatawan',
+                    'tahun' => $this->tahunWisata,
+                    'data' => $this->dataGrafik(KunjunganWisata::query(), $this->tahunWisata),
+                    'daftarTahun' => $this->daftarTahun(KunjunganWisata::query(), $this->tahunWisata),
+                    'menu' => 'Data Kunjungan Wisata',
+                ],
+                [
+                    'model' => 'tahun',
+                    'kunci' => 'grafik-kunjungan-hotel',
+                    'judul' => 'Kunjungan hotel per bulan',
+                    'satuan' => 'tamu',
+                    'tahun' => $this->tahun,
+                    'data' => $this->dataGrafik(KunjunganHotel::query(), $this->tahun),
+                    'daftarTahun' => $this->daftarTahun(KunjunganHotel::query(), $this->tahun),
+                    'menu' => 'Data Kunjungan Hotel',
+                ],
+            ],
             'daftarBulan' => KunjunganWisata::BULAN,
         ]);
     }

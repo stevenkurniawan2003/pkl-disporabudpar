@@ -62,7 +62,8 @@ class LayoutPublikTest extends TestCase
             ->assertSee('<iframe', false)
             ->assertSee('mailto:disporabudpar@jemberkab.go.id', false)
             ->assertSee('bi-instagram', false)
-            ->assertDontSee('bi-tiktok', false); // URL kosong tidak ditampilkan
+            ->assertSee('bi-tiktok', false) // ikon tetap tampil walau URL kosong...
+            ->assertDontSee('href=""', false); // ...tapi tanpa tautan
     }
 
     public function test_satu_sesi_dihitung_sekali_per_hari(): void

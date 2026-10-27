@@ -84,13 +84,23 @@
         <div><h2 id="judul-berita">Berita terbaru</h2></div>
         <a class="sh-link" href="{{ route('publik.berita') }}" wire:navigate>Semua berita</a>
     </div>
-    <div class="news">
-        @forelse ($berita as $b)
-            @include('livewire.publik.partials.kartu-berita', ['b' => $b])
-        @empty
-            <p style="color:var(--mut)">Belum ada berita.</p>
-        @endforelse
-    </div>
+    @if ($berita->isEmpty())
+        <p style="color:var(--mut)">Belum ada berita.</p>
+    @else
+        {{-- 2 berita terbaru sebagai kartu utama, sisanya kartu biasa di bawahnya. --}}
+        <div class="news-utama">
+            @foreach ($berita->take(2) as $b)
+                @include('livewire.publik.partials.kartu-berita', ['b' => $b, 'utama' => true])
+            @endforeach
+        </div>
+        @if ($berita->count() > 2)
+            <div class="news">
+                @foreach ($berita->skip(2) as $b)
+                    @include('livewire.publik.partials.kartu-berita', ['b' => $b])
+                @endforeach
+            </div>
+        @endif
+    @endif
 </section>
 
 <section class="sec" aria-label="Ringkasan data">
@@ -104,10 +114,6 @@
             <small>Kunjungan hotel, {{ $periode($kunjungan['hotel']) }}</small>
             <b>{{ $angka($kunjungan['hotel']['total'] ?? 0) }}</b>
             <a href="{{ route('publik.kunjungan-hotel', $kunjungan['hotel'] ? ['tahun' => $kunjungan['hotel']['tahun']] : []) }}" wire:navigate>Lihat rincian</a>
-        </div>
-        <div>
-            <small>Layanan</small>
-            <p style="margin:4px 0 0"><a class="chip" href="{{ route('publik.kebudayaan') }}" wire:navigate>Kartu induk kesenian</a> <a class="chip" href="{{ route('publik.ekonomi-kreatif') }}" wire:navigate>Data ekraf</a></p>
         </div>
     </div>
 </section>
