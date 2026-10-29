@@ -2,9 +2,12 @@
 
 namespace App\Livewire\Publik;
 
+use App\Models\Atlet;
 use App\Models\Berita;
+use App\Models\Cabor;
 use App\Models\KunjunganHotel;
 use App\Models\KunjunganWisata;
+use App\Models\Pelatih;
 use App\Models\Wisata;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
@@ -50,6 +53,22 @@ class Beranda extends Component
         return ['tahun' => (int) $tahun, 'bulan_akhir' => (int) $baris->bulan_akhir, 'total' => (int) $baris->total];
     }
 
+    /**
+     * Total atlet, pelatih, dan cabor dalam satu query (beranda dijaga tetap sedikit query).
+     *
+     * @return array{atlet: int, pelatih: int, cabor: int}
+     */
+    private static function statistikOlahraga(): array
+    {
+        $baris = Atlet::query()->toBase()
+            ->selectRaw('COUNT(*) AS atlet')
+            ->selectSub(Pelatih::query()->toBase()->selectRaw('COUNT(*)'), 'pelatih')
+            ->selectSub(Cabor::query()->toBase()->selectRaw('COUNT(*)'), 'cabor')
+            ->first();
+
+        return ['atlet' => (int) $baris->atlet, 'pelatih' => (int) $baris->pelatih, 'cabor' => (int) $baris->cabor];
+    }
+
     public function render()
     {
         $wisata = fn () => Wisata::with(['kategori', 'kecamatan'])->tayang()->latest('id')->limit(4);
@@ -71,6 +90,8 @@ class Beranda extends Component
                 ->get(),
 
             'kunjungan' => self::ringkasanKunjungan(),
+            // Statistik PPO (dokumen konsep PPO poin 1).
+            'olahraga' => self::statistikOlahraga(),
             'namaBulan' => KunjunganWisata::BULAN,
         ]);
     }

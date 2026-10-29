@@ -41,8 +41,8 @@ class DashboardTest extends TestCase
     {
         $this->hotel('A');
         $this->hotel('B');
-        Kesenian::create(['nama_kesenian' => 'Tari', 'kategori' => 'Tari', 'deskripsi' => 'x']);
-        Ekraf::create(['nama_usaha' => 'U', 'nama_pemilik' => 'P', 'subsektor' => 'Kuliner', 'alamat' => 'x', 'deskripsi' => 'x']);
+        Kesenian::factory()->create();
+        Ekraf::factory()->create();
 
         Livewire::test(Dashboard::class)
             ->assertViewHas('jumlahHotel', 2)

@@ -30,7 +30,8 @@ class KunjunganWisata extends HalamanKunjungan
 
     protected function daftarPilihan(): Collection
     {
-        return Wisata::tayang()->orderBy('nama')->get(['id', 'nama']);
+        return Wisata::tayang()->orderBy('nama')->get(['id', 'nama', 'gambar_utama'])
+            ->map(fn (Wisata $w) => (object) ['id' => $w->id, 'nama' => $w->nama, 'gambar' => $w->gambar_url]);
     }
 
     protected function rekapPerTempat(Builder $query): Collection
@@ -38,12 +39,13 @@ class KunjunganWisata extends HalamanKunjungan
         return $query
             ->join('wisata', 'wisata.id', '=', 'kunjungan_wisata.wisata_id')
             ->groupBy('wisata.id', 'wisata.nama', 'wisata.slug')
-            ->selectRaw('wisata.nama, wisata.slug, SUM(domestik) AS domestik, SUM(mancanegara) AS mancanegara, SUM(domestik + mancanegara) AS total')
+            ->selectRaw('wisata.id, wisata.nama, wisata.slug, SUM(domestik) AS domestik, SUM(mancanegara) AS mancanegara, SUM(domestik + mancanegara) AS total')
             ->orderByDesc('total')
             ->orderBy('wisata.nama')
             ->toBase()
             ->get()
             ->map(fn ($r) => (object) [
+                'id' => (int) $r->id,
                 'nama' => $r->nama,
                 'url' => route('publik.detail-wisata', $r->slug),
                 'domestik' => (int) $r->domestik,

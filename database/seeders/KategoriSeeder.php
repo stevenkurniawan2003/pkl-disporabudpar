@@ -24,21 +24,5 @@ class KategoriSeeder extends Seeder
             ['nama' => 'Olahraga', 'slug' => 'olahraga'],
             ['nama' => 'Kepemudaan', 'slug' => 'kepemudaan'],
         ]);
-        DB::table('subsektor_ekraf')->insertOrIgnore([
-            ['nama' => 'Kuliner'],
-            ['nama' => 'Kriya'],
-            ['nama' => 'Fesyen'],
-            ['nama' => 'Seni pertunjukan'],
-            ['nama' => 'Fotografi'],
-            ['nama' => 'Aplikasi dan game'],
-        ]);
-        DB::table('jenis_kesenian')->insertOrIgnore([
-            ['nama' => 'Tari'],
-            ['nama' => 'Musik tradisional'],
-            ['nama' => 'Teater'],
-            ['nama' => 'Karawitan'],
-            ['nama' => 'Pencak silat'],
-            ['nama' => 'Egrang'],
-        ]);
     }
 }

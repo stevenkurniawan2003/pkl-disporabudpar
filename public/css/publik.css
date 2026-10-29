@@ -25,12 +25,14 @@ nav{display:flex;gap:2px;margin-left:auto;align-items:center}
 .btn{border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 18px;cursor:pointer;font-weight:700}
 .btn.p{background:var(--pink);border-color:var(--pink);color:var(--onpink)}
 .slider{position:relative;overflow:hidden;border-radius:24px;margin:24px 0;height:380px}
-.sl{position:absolute;inset:0;padding:44px;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .6s;color:#fff}
+.sl{position:absolute;inset:0;padding:44px 72px;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .6s;color:#fff}
 .sl.on{opacity:1}
 .sl h1{font-size:clamp(26px,4.4vw,44px);line-height:1.1;margin:0 0 10px;max-width:560px;font-weight:800}
 .sl p{margin:0 0 18px;max-width:480px;opacity:.95}
 .sl .btn{align-self:flex-start;background:#fff;color:#B0245A;border-color:#fff}
 .sl svg{position:absolute;right:-40px;top:-30px;width:60%;opacity:.28}
+.sl-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.22);color:#fff;font-size:28px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0 0 3px;transition:background .2s}
+.sl-nav:hover,.sl-nav:focus-visible{background:rgba(255,255,255,.4)}.sl-nav.kiri{left:14px}.sl-nav.kanan{right:14px}
 .dots{position:absolute;right:24px;bottom:24px;display:flex;gap:8px;z-index:2}
 .dots button{width:10px;height:10px;border-radius:50%;border:0;background:rgba(255,255,255,.5);cursor:pointer;padding:0}.dots button.on{background:#fff;width:26px;border-radius:6px}
 .sec{padding:36px 0}
@@ -94,7 +96,7 @@ footer h4{margin:0 0 8px}footer p{margin:2px 0;color:var(--mut)}
 .fm input,.fm textarea{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:10px 12px;font:inherit}.fm textarea{height:120px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 @media(max-width:860px){.two{grid-template-columns:1fr}.orow::before{display:none}}
-@media(max-width:860px){nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg);flex-direction:column;align-items:stretch;padding:10px 20px;border-bottom:1px solid var(--line)}nav.on{display:flex}.bg{display:block}.dd{position:static;display:block;border:0;padding:0 0 0 12px}.mapw{grid-template-columns:1fr}.lst{max-height:220px}.fg{grid-template-columns:1fr}.slider{height:340px}.sl{padding:26px}}
+@media(max-width:860px){nav{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg);flex-direction:column;align-items:stretch;padding:10px 20px;border-bottom:1px solid var(--line)}nav.on{display:flex}.bg{display:block}.dd{position:static;display:block;border:0;padding:0 0 0 12px}.mapw{grid-template-columns:1fr}.lst{max-height:220px}.fg{grid-template-columns:1fr}.slider{height:340px}.sl{padding:26px 56px}.sl-nav{width:36px;height:36px;font-size:24px}.sl-nav.kiri{left:10px}.sl-nav.kanan{right:10px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
 /* tautan navigasi (pengganti button) */
@@ -306,3 +308,104 @@ a.c.kartu-berita{display:flex;flex-direction:column}
 /* Mini galeri di detail berita */
 .mini-galeri{margin-top:26px}
 .mini-galeri h2 small{color:var(--mut);font-weight:500;font-size:14px}
+
+/* Dashboard Kebudayaan: kartu ringkasan & grafik garis per kategori */
+.ringkas.empat{grid-template-columns:repeat(4,1fr)}
+a.ringkas-kartu{color:var(--ink);text-decoration:none;transition:border-color .15s,transform .15s}
+a.ringkas-kartu:hover{border-color:var(--pink3);transform:translateY(-2px)}
+.grafik-kartu{--seri-1:#E8487F;--seri-2:#2a78d6}
+:root[data-theme="dark"] .grafik-kartu{--seri-2:#3987e5}
+.grafik-daftar .grafik-kartu+.grafik-kartu{margin-top:16px}
+.grafik-wadah.lebar{height:380px}
+@media(max-width:960px){.ringkas.empat{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.ringkas.empat{grid-template-columns:1fr}.grafik-wadah.lebar{height:340px}}
+
+/* Data EKRAF Jember: kartu aktif (hijau) & non aktif (merah) */
+.ringkas.dua{grid-template-columns:repeat(2,1fr)}
+.ringkas-kartu.aktif{border-color:#1F9D6B55}.ringkas-kartu.aktif b{color:#1F9D6B}
+.ringkas-kartu.nonaktif{border-color:#D9364A55}.ringkas-kartu.nonaktif b{color:#D9364A}
+:root[data-theme="dark"] .ringkas-kartu.aktif b{color:#4CC995}
+:root[data-theme="dark"] .ringkas-kartu.nonaktif b{color:#FF7A8A}
+@media(max-width:760px){.ringkas.dua{grid-template-columns:1fr}}
+
+/* Warna garis tambahan (PPO): total/emas, perunggu, perak */
+.grafik-kartu{--seri-3:#D99A00;--seri-4:#A0612B;--seri-5:#7D8A96}
+:root[data-theme="dark"] .grafik-kartu{--seri-3:#F2B829;--seri-4:#D08A4E;--seri-5:#AEB8C2}
+.bd.medali.emas{background:#FFF3C4;color:#8A6200}.bd.medali.perak{background:#ECEFF2;color:#4F5B66}.bd.medali.perunggu{background:#F7E3D3;color:#8A4B1C}
+
+/* Sorotan Prestasi: galeri foto/video */
+.galeri-prestasi{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.galeri-prestasi figure{margin:0;display:flex;flex-direction:column;gap:6px}
+.galeri-prestasi video{width:100%;aspect-ratio:4/3;border-radius:12px;background:#000;display:block}
+.galeri-prestasi figcaption{font-size:14px;line-height:1.4}
+
+/* Peta Wisata berlapis (dokumen Pariwisata): warna per kategori, filter centang, bagian saran */
+.pin-mini.desa-wisata,.pin-peta.desa-wisata span,.pin-latar.desa-wisata{background:#2E9D5B}
+.pin-mini.ekraf,.pin-peta.ekraf span,.pin-latar.ekraf{background:#8E44AD}
+.pin-mini.hotel,.pin-latar.hotel{background:#2a78d6}
+.pin-mini.objek-wisata,.pin-peta.objek-wisata span,.pin-latar.objek-wisata{background:#E8487F}
+.pin-mini.restoran,.pin-peta.restoran span,.pin-latar.restoran{background:#E67E22}
+.pin-mini.seni-budaya,.pin-peta.seni-budaya span,.pin-latar.seni-budaya{background:#C0392B}
+.pin-mini.situs-budaya,.pin-peta.situs-budaya span,.pin-latar.situs-budaya{background:#8D6E63}
+.pin-mini.oleh-oleh,.pin-peta.oleh-oleh span,.pin-latar.oleh-oleh{background:#16A085}
+.pin-mini.cabor,.pin-peta.cabor span,.pin-latar.cabor{background:#1F2A7A}
+.pin-mini.lainnya,.pin-peta.lainnya span,.pin-latar.lainnya{background:#7F8C8D}
+.pp-ph.pin-latar i{color:#fff;font-size:34px}
+.peta-lapis{margin-bottom:28px}
+.filter-lapis{border:0;margin:0 0 12px;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.filter-lapis legend{float:left;font-weight:700;margin-right:6px;padding:0}
+.cek-lapis{display:inline-flex;gap:6px;align-items:center;font-size:14px;cursor:pointer}
+.cek-lapis input{accent-color:var(--pink)}
+.cek-lapis .pin-mini{margin-left:2px}
+.map.peta-besar{min-height:520px}
+.dua-kolom-peta{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:8px}
+.daftar-mini{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.daftar-mini .it{display:flex;gap:12px;align-items:center;color:var(--ink);text-decoration:none}
+.daftar-mini .it small{display:block;color:var(--mut)}
+@media(max-width:860px){.dua-kolom-peta{grid-template-columns:1fr}.map.peta-besar{min-height:400px}}
+
+/* Paket wisata: flyer + CP */
+.news.paket{grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.dd-foto.flyer{border-radius:0;aspect-ratio:3/4;width:100%}
+.paket-deskripsi{margin:8px 0 0;color:var(--mut);font-size:14px;line-height:1.55;white-space:pre-line}
+.paket-cp{margin-top:auto;padding-top:12px;display:flex;flex-direction:column;gap:8px;font-size:14px}
+.paket-cp .btn{align-self:flex-start}
+
+/* Data kunjungan: foto tiap destinasi/hotel di bawah grafik */
+.foto-tempat{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:12px;max-height:560px;overflow:auto;padding:2px}
+.foto-tempat-item{border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:0 0 10px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;overflow:hidden;color:var(--ink)}
+.foto-tempat-item b{padding:0 10px;font-size:14px;line-height:1.3}
+.foto-tempat-item small{padding:0 10px;color:var(--mut);font-size:12px}
+.foto-tempat-ph{aspect-ratio:4/3;background:var(--bg2);display:grid;place-items:center;color:var(--mut);font-size:26px;margin-bottom:6px}
+.foto-tempat-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-tempat-item.on{border-color:var(--pink);box-shadow:0 0 0 2px var(--pink)}
+.foto-tempat-item:focus-visible{outline:3px solid var(--pink);outline-offset:2px}
+
+/* Halaman UPTD (statis) */
+.uptd-kepala{background:linear-gradient(135deg,#1B5E3B,#2E7D52);color:#fff;border-radius:22px;padding:28px 30px;margin-bottom:8px}
+.uptd-kepala small{color:#E8C66A;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.uptd-kepala h1{color:#fff;margin:6px 0 4px}
+.uptd-kepala p{margin:0;color:#E6F2EA}
+.uptd section{margin-top:8px}
+.uptd-no{display:inline-block;font-weight:800;color:#C9A227;margin-right:6px}
+.uptd-sarana{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:12px}
+.uptd-sarana figure{margin:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg)}
+.uptd-sarana img,.uptd-ph{width:100%;aspect-ratio:4/3;object-fit:cover;display:grid;place-items:center;background:var(--bg2);color:var(--mut);font-size:30px}
+.uptd-sarana figcaption{padding:10px 12px;font-weight:700;font-size:14px}
+.tabel-sop td{vertical-align:top;font-size:14px}.tabel-sop ol{margin:0;padding-left:18px}
+.uptd-fasilitas{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:12px}
+.uptd-fasilitas.dua{grid-template-columns:repeat(2,1fr)}
+.uptd-fasilitas > div{border:1px solid var(--line);border-left:4px solid #2E7D52;border-radius:12px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:2px}
+.uptd-fasilitas i{color:#2E7D52;font-size:20px}
+.uptd-fasilitas small{color:var(--mut)}
+.uptd-destinasi{display:grid;grid-template-columns:260px 1fr;border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-top:16px;background:var(--bg)}
+.uptd-dest-kiri{background:#1B5E3B;color:#fff;padding:22px;display:flex;flex-direction:column;gap:4px}
+.uptd-dest-kiri > i{font-size:30px;color:#E8C66A}
+.uptd-dest-kiri h3{margin:4px 0;font-size:22px;color:#fff}
+.uptd-dest-kiri small{color:#D5E9DC}
+.uptd-dest-isi{padding:20px 22px}
+.uptd-dest-isi > p:first-child{margin-top:0;line-height:1.7}
+.uptd-jam{display:flex;flex-wrap:wrap;gap:8px 20px;background:var(--bg2);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:0}
+.uptd-penutup{text-align:center;font-weight:700;color:#2E7D52;margin-top:28px}
+:root[data-theme="dark"] .uptd-fasilitas i,:root[data-theme="dark"] .uptd-penutup{color:#6FCF97}
+@media(max-width:760px){.uptd-destinasi{grid-template-columns:1fr}.uptd-fasilitas.dua{grid-template-columns:1fr}}

@@ -29,10 +29,10 @@ abstract class HalamanKunjungan extends Component
     /** Kolom kunjungan yang menunjuk ke tempat (wisata_id / hotel_id). */
     abstract protected function kolomTempat(): string;
 
-    /** Pilihan di dropdown: koleksi objek dengan ->id dan ->nama. */
+    /** Pilihan di dropdown dan kartu foto di bawah grafik: koleksi objek dengan ->id, ->nama, dan ->gambar (URL atau null). */
     abstract protected function daftarPilihan(): Collection;
 
-    /** Rekap per tempat: baris berisi nama, url, domestik, mancanegara, total (terbanyak dulu). */
+    /** Rekap per tempat: baris berisi id, nama, url, domestik, mancanegara, total (terbanyak dulu). */
     abstract protected function rekapPerTempat(Builder $query): Collection;
 
     /** Teks halaman: judul, deskripsi, semua (label "semua ..."), kolom (judul kolom tempat), title. */
@@ -115,6 +115,8 @@ abstract class HalamanKunjungan extends Component
             'rekap' => $this->rekapPerTempat($this->queryTersaring()),
             'daftarTahun' => $this->daftarTahun(),
             'daftarPilihan' => $this->daftarPilihan(),
+            // Total setahun tiap tempat (tanpa filter pilihan) untuk kartu foto di bawah grafik.
+            'totalPerTempat' => $this->rekapPerTempat($this->queryPublik()->where('tahun', $this->tahun))->pluck('total', 'id'),
         ])->title($teks['title']);
     }
 }

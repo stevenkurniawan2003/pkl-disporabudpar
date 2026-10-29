@@ -1,5 +1,6 @@
+@php $angka = fn ($n) => number_format((int) $n, 0, ',', '.'); @endphp
 <div>
-    <x-admin.topbar judul="Ekonomi Kreatif" sub="Data pelaku usaha ekonomi kreatif dan UMKM" />
+    <x-admin.topbar judul="Data Master EKRAF" sub="Sistem input data pelaku ekonomi kreatif Kabupaten Jember" />
 
     @if ($pesan)
         <div class="alert {{ $jenisPesan }}" role="{{ $jenisPesan === 'err' ? 'alert' : 'status' }}" wire:key="pesan-{{ md5($pesan) }}">
@@ -8,49 +9,70 @@
         </div>
     @endif
 
+    <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+        <div class="card stat"><small>Jumlah nama usaha/pelaku ekonomi kreatif aktif</small><b style="color:var(--ok)">{{ $angka($jumlahAktif) }}</b><span>pelaku</span></div>
+        <div class="card stat"><small>Jumlah nama usaha/pelaku ekonomi kreatif non aktif</small><b style="color:var(--pinkink)">{{ $angka($jumlahNonaktif) }}</b><span>pelaku</span></div>
+    </div>
+
+    <details class="card" style="margin-bottom:16px" open>
+        <summary style="cursor:pointer;font-weight:600">Grafik rincian data per subsektor dan per kecamatan</summary>
+        <div style="margin-top:14px">
+            @include('livewire.publik.partials.grafik-garis', ['daftarGrafik' => $daftarGrafik])
+        </div>
+    </details>
+
     <div class="bar-tools">
-        <input type="search" wire:model.live.debounce.300ms="cari" placeholder="Cari nama usaha, pemilik, atau alamat…" aria-label="Cari ekonomi kreatif">
-        <select wire:model.live="subsektor" aria-label="Filter subsektor">
-            <option value="">Semua subsektor</option>
-            @foreach ($daftarSubsektor as $s)
-                <option value="{{ $s }}">{{ $s }}</option>
+        <select wire:model.live="kolom" aria-label="Cari berdasarkan">
+            @foreach ($kolomCari as $nilai => $label)
+                <option value="{{ $nilai }}">{{ $label }}</option>
             @endforeach
         </select>
-        <button type="button" class="btn p" wire:click="$dispatchTo('admin.ekraf-form', 'buka-form-ekraf')">+ Tambah pelaku</button>
+        <input type="search" wire:model.live.debounce.300ms="cari" placeholder="Cari data…" aria-label="Cari data ekraf">
+        <button type="button" class="btn p" wire:click="$dispatchTo('admin.ekraf-form', 'buka-form-ekraf')">+ Input Data Master</button>
     </div>
 
     <div class="tw">
         <table>
             <thead>
                 <tr>
-                    <th>Nama usaha</th>
-                    <th>Pemilik</th>
+                    <th>ID usaha/pelaku</th>
+                    <th>Nama usaha/pelaku</th>
                     <th>Subsektor</th>
                     <th>Alamat</th>
+                    <th>Kecamatan</th>
+                    <th>Desa</th>
+                    <th class="n">Omzet</th>
+                    <th>Telp</th>
+                    <th>Status</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($daftar as $e)
                     <tr wire:key="ekraf-{{ $e->id_ekraf }}">
+                        <td><b>{{ $e->nomor_ekraf }}</b></td>
                         <td>{{ $e->nama_usaha }}</td>
-                        <td>{{ $e->nama_pemilik }}</td>
-                        <td><span class="bd g">{{ $e->subsektor }}</span></td>
+                        <td>{{ $e->subsektor_lengkap }}</td>
                         <td>{{ $e->alamat }}</td>
+                        <td>{{ $e->kecamatan->nama ?? '–' }}</td>
+                        <td>{{ $e->desa->nama ?? '–' }}</td>
+                        <td class="n">{{ $angka($e->omzet) }}</td>
+                        <td>{{ $e->no_telepon ?? '–' }}</td>
+                        <td><span class="bd {{ $e->status === 'aktif' ? 'g' : 'warn' }}">{{ $e->status_label }}</span></td>
                         <td>
                             <div class="act">
                                 <button type="button" class="btn s" wire:click="lihatDetail({{ $e->id_ekraf }})">Detail</button>
                                 <button type="button" class="btn s" wire:click="$dispatchTo('admin.ekraf-form', 'buka-form-ekraf', { id: {{ $e->id_ekraf }} })">Ubah</button>
                                 <button type="button" class="btn s d"
                                         wire:click="hapus({{ $e->id_ekraf }})"
-                                        wire:confirm="Hapus data &quot;{{ $e->nama_usaha }}&quot;? Data ini dihapus permanen.">Hapus</button>
+                                        wire:confirm="Hapus data &quot;{{ $e->nama_usaha }}&quot; ({{ $e->nomor_ekraf }})? Data yang dihapus tidak bisa dikembalikan.">Hapus</button>
                             </div>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="5" class="empty">
-                        @if ($cari !== '' || $subsektor !== '') Tidak ada data yang cocok dengan pencarian.
-                        @else Belum ada data ekonomi kreatif. Klik "+ Tambah pelaku" untuk mulai.
+                    <tr><td colspan="10" class="empty">
+                        @if ($cari !== '') Tidak ada data yang cocok dengan "{{ $cari }}".
+                        @else Belum ada data pelaku ekraf. Klik "+ Input Data Master" untuk mulai.
                         @endif
                     </td></tr>
                 @endforelse
@@ -71,23 +93,19 @@
         <div class="ov on" wire:click.self="tutupDetail" x-on:keydown.escape.window="$wire.tutupDetail()">
             <div class="md" role="dialog" aria-modal="true" aria-labelledby="judul-detail-ekraf">
                 <div class="mh">
-                    <h2 id="judul-detail-ekraf">Detail pelaku ekonomi kreatif</h2>
+                    <h2 id="judul-detail-ekraf">Detail usaha/pelaku EKRAF</h2>
                     <button type="button" class="btn s" wire:click="tutupDetail" aria-label="Tutup">✕</button>
                 </div>
 
                 <div class="mb">
-                    <div class="info full"><small>Nama usaha</small><b>{{ $detail->nama_usaha }}</b></div>
-                    <div class="info"><small>Nama pemilik</small><p>{{ $detail->nama_pemilik }}</p></div>
-                    <div class="info"><small>Subsektor</small><p>{{ $detail->subsektor }}</p></div>
-                    <div class="info full"><small>Alamat</small><p>{{ $detail->alamat }}</p></div>
-                    <div class="info"><small>Nomor telepon</small><p>{{ $detail->no_telepon ?? '–' }}</p></div>
-                    <div class="info">
-                        <small>Media sosial</small>
-                        <p>@if ($detail->media_sosial)<a href="{{ $detail->media_sosial }}" target="_blank" rel="noopener">{{ $detail->media_sosial }} ↗</a>@else – @endif</p>
-                    </div>
-                    <div class="info full"><small>Deskripsi</small><p>{!! nl2br(e($detail->deskripsi)) !!}</p></div>
+                    <div class="info"><small>ID usaha/pelaku</small><b>{{ $detail->nomor_ekraf }}</b></div>
+                    <div class="info"><small>Status</small><p>{{ $detail->status_label }}</p></div>
+                    <div class="info full"><small>Nama usaha/pelaku</small><p>{{ $detail->nama_usaha }}</p></div>
+                    <div class="info"><small>Subsektor</small><p>{{ $detail->subsektor_lengkap }}</p></div>
+                    <div class="info"><small>Omzet</small><p>{{ $detail->omzet_rupiah }}</p></div>
+                    <div class="info full"><small>Alamat</small><p>{{ $detail->alamat }}, Desa {{ $detail->desa->nama ?? '–' }}, Kec. {{ $detail->kecamatan->nama ?? '–' }}, Kab. {{ $detail->kabupaten }}</p></div>
+                    <div class="info"><small>Telp</small><p>{{ $detail->no_telepon ?? '–' }}</p></div>
                     <div class="info"><small>Ditambahkan</small><p>{{ $detail->created_at?->locale('id')->translatedFormat('j F Y, H:i') ?? '–' }}</p></div>
-                    <div class="info"><small>Terakhir diubah</small><p>{{ $detail->updated_at?->locale('id')->translatedFormat('j F Y, H:i') ?? '–' }}</p></div>
                 </div>
 
                 <div class="mf">

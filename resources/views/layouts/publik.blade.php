@@ -4,25 +4,46 @@
         ['Beranda', 'publik.beranda'],
         ['Destinasi', [
             ['Peta Wisata', 'publik.peta-wisata'],
+            ['Desa Wisata', 'publik.desa-wisata'],
             ['Data Kunjungan Wisata', 'publik.kunjungan-wisata'],
             ['Data Kunjungan Hotel', 'publik.kunjungan-hotel'],
+            ['Paket Wisata', 'publik.paket-wisata'],
+            ['E-Booklet', 'publik.ebooklet'],
         ]],
         ['Berita', 'publik.berita'],
-        ['Kebudayaan', 'publik.kebudayaan'],
-        ['Ekonomi Kreatif', 'publik.ekonomi-kreatif'],
+        ['Kebudayaan', [
+            ['Dashboard Kebudayaan', 'publik.kebudayaan'],
+            ['Data Kesenian', 'publik.data-kesenian'],
+            ['Objek Pemajuan Kebudayaan', 'publik.opk'],
+            ['Cagar Budaya', 'publik.cagar-budaya'],
+        ]],
+        ['Ekonomi Kreatif', [
+            ['Data EKRAF Jember', 'publik.ekonomi-kreatif'],
+            ['Pencarian Data EKRAF', 'publik.pencarian-ekraf'],
+            // Elemen ketiga false: tautan biasa tanpa wire:navigate (pindah ke panel admin / halaman login).
+            ['Sistem EKRAF', 'admin.ekonomi-kreatif', false],
+        ]],
+        ['PPO', [
+            ['Database Atlet', 'publik.ppo-atlet'],
+            ['Database Pelatih', 'publik.ppo-pelatih'],
+            ['Database Cabor', 'publik.ppo-cabor'],
+            ['Sorotan Prestasi', 'publik.ppo-prestasi'],
+        ]],
         ['Profil', [
             ['Tentang Kami', 'publik.profil.tentang-kami'],
             ['Visi Misi', 'publik.profil.visi-misi'],
             ['Struktur Organisasi', 'publik.profil.struktur-organisasi'],
             ['Tugas dan Fungsi', 'publik.profil.tugas-dan-fungsi'],
+            ['UPTD Sarana Prasarana Olahraga', 'publik.uptd.olahraga'],
+            ['UPTD Destinasi Wisata Terpadu', 'publik.uptd.wisata-terpadu'],
         ]],
     ];
     // Route lain yang ikut menandai menu sebagai aktif (misalnya detail berita -> menu Berita).
     $aktifJuga = [
         'publik.berita' => ['publik.detail-berita'],
         'publik.peta-wisata' => ['publik.detail-wisata', 'publik.detail-hotel'],
-        'publik.kebudayaan' => ['publik.detail-kesenian'],
-        'publik.ekonomi-kreatif' => ['publik.detail-ekraf'],
+        'publik.opk' => ['publik.detail-opk'],
+        'publik.cagar-budaya' => ['publik.detail-cagar-budaya'],
     ];
     $ada = fn ($nama) => \Illuminate\Support\Facades\Route::has($nama);
     $aktif = fn ($nama) => request()->routeIs($nama, $nama.'.*', ...($aktifJuga[$nama] ?? []));
@@ -59,8 +80,13 @@
                         <div class="ni">
                             <button type="button" class="nb {{ collect($anak)->contains(fn ($a) => $aktif($a[1])) ? 'on' : '' }}" aria-haspopup="true">{{ $label }} ▾</button>
                             <div class="dd">
-                                @foreach ($anak as [$l, $r])
-                                    <a class="nb {{ $aktif($r) ? 'on' : '' }}" href="{{ route($r) }}" wire:navigate>{{ $l }}</a>
+                                @foreach ($anak as $a)
+                                    @php [$l, $r] = $a; @endphp
+                                    @if ($a[2] ?? true)
+                                        <a class="nb {{ $aktif($r) ? 'on' : '' }}" href="{{ route($r) }}" wire:navigate>{{ $l }}</a>
+                                    @else
+                                        <a class="nb" href="{{ route($r) }}">{{ $l }} <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i></a>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -181,7 +207,10 @@
         if (lb && t === lb) { lb.close(); return; }
 
         var dot = t.closest('.dots button');
-        if (dot) { pindah(parseInt(dot.getAttribute('data-s'), 10) || 0); return; }
+        if (dot) { pindah(parseInt(dot.getAttribute('data-s'), 10) || 0, true); return; }
+
+        var panah = t.closest('.sl-nav');
+        if (panah) { pindah(slideAktif() + (parseInt(panah.getAttribute('data-arah'), 10) || 1), true); return; }
 
         var tombol = t.closest('.ni > button.nb');
         q('.ni.open').forEach(function (n) { if (!tombol || n !== tombol.parentNode) n.classList.remove('open'); });
@@ -217,19 +246,23 @@
         q('.ni.open').forEach(function (n) { n.classList.remove('open'); });
     });
 
-    // Slider beranda
-    function pindah(i) {
+    // Slider beranda; geser manual (titik/panah) menunda geser otomatis berikutnya.
+    var terakhirManual = 0;
+    function slideAktif() {
+        return q('#sl .sl').findIndex(function (x) { return x.classList.contains('on'); });
+    }
+    function pindah(i, manual) {
         var s = q('#sl .sl'), d = q('#sl .dots button');
         if (!s.length) return;
+        if (manual) terakhirManual = Date.now();
         i = ((i % s.length) + s.length) % s.length;
         s.forEach(function (x, n) { x.classList.toggle('on', n === i); });
         d.forEach(function (x, n) { x.classList.toggle('on', n === i); });
     }
     setInterval(function () {
         var s = q('#sl .sl');
-        if (s.length < 2 || document.hidden) return;
-        var sekarang = s.findIndex(function (x) { return x.classList.contains('on'); });
-        pindah(sekarang + 1);
+        if (s.length < 2 || document.hidden || Date.now() - terakhirManual < 5500) return;
+        pindah(slideAktif() + 1);
     }, 5500);
 })();
 </script>

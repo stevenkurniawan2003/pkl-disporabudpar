@@ -34,6 +34,8 @@
             <a class="btn" href="{{ $tautan }}" wire:navigate>{{ $tombol }}</a>
         </div>
     @endforeach
+    <button type="button" class="sl-nav kiri" data-arah="-1" aria-label="Slide sebelumnya">&#8249;</button>
+    <button type="button" class="sl-nav kanan" data-arah="1" aria-label="Slide berikutnya">&#8250;</button>
     <div class="dots">
         @foreach ($slide as $i => $s)
             <button type="button" class="{{ $i === 0 ? 'on' : '' }}" data-s="{{ $i }}" aria-label="Slide {{ $i + 1 }}"></button>
@@ -106,14 +108,31 @@
 <section class="sec" aria-label="Ringkasan data">
     <div class="band">
         <div>
-            <small>Kunjungan wisatawan, {{ $periode($kunjungan['wisata']) }}</small>
+            <small>Kunjungan Wisatawan {{ $periode($kunjungan['wisata']) }}</small>
             <b>{{ $angka($kunjungan['wisata']['total'] ?? 0) }}</b>
             <a href="{{ route('publik.kunjungan-wisata', $kunjungan['wisata'] ? ['tahun' => $kunjungan['wisata']['tahun']] : []) }}" wire:navigate>Lihat rincian</a>
         </div>
         <div>
-            <small>Kunjungan hotel, {{ $periode($kunjungan['hotel']) }}</small>
+            <small>Kunjungan Hotel {{ $periode($kunjungan['hotel']) }}</small>
             <b>{{ $angka($kunjungan['hotel']['total'] ?? 0) }}</b>
             <a href="{{ route('publik.kunjungan-hotel', $kunjungan['hotel'] ? ['tahun' => $kunjungan['hotel']['tahun']] : []) }}" wire:navigate>Lihat rincian</a>
+        </div>
+    </div>
+    <div class="band" style="margin-top:16px" aria-label="Statistik olahraga">
+        <div>
+            <small>Total Atlet</small>
+            <b>{{ $angka($olahraga['atlet']) }}</b>
+            <a href="{{ route('publik.ppo-atlet') }}" wire:navigate>Database atlet</a>
+        </div>
+        <div>
+            <small>Total Pelatih</small>
+            <b>{{ $angka($olahraga['pelatih']) }}</b>
+            <a href="{{ route('publik.ppo-pelatih') }}" wire:navigate>Database pelatih</a>
+        </div>
+        <div>
+            <small>Total Cabang Olahraga (Cabor)</small>
+            <b>{{ $angka($olahraga['cabor']) }}</b>
+            <a href="{{ route('publik.ppo-cabor') }}" wire:navigate>Database cabor</a>
         </div>
     </div>
 </section>

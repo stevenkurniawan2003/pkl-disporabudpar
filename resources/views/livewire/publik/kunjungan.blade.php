@@ -35,6 +35,27 @@
 
 @include('livewire.publik.partials.grafik-kunjungan', ['judulGrafik' => 'Kunjungan per bulan, '.$tahun])
 
+{{-- Foto tiap destinasi/hotel di bawah grafik (saran dokumen konsep Pariwisata). Klik untuk menampilkan grafiknya. --}}
+@if ($daftarPilihan->isNotEmpty())
+    <h2 class="judul-tabel">Pilih {{ \Illuminate\Support\Str::lower($teks['kolom']) }}</h2>
+    <div class="foto-tempat" role="list">
+        <button type="button" role="listitem" class="foto-tempat-item semua {{ $pilihan === 0 ? 'on' : '' }}" wire:click="$set('pilihan', 0)" aria-pressed="{{ $pilihan === 0 ? 'true' : 'false' }}">
+            <span class="foto-tempat-ph"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i></span>
+            <b>{{ $teks['semua'] }}</b>
+            <small>{{ $angka($totalPerTempat->sum()) }} kunjungan {{ $tahun }}</small>
+        </button>
+        @foreach ($daftarPilihan as $p)
+            <button type="button" role="listitem" wire:key="foto-{{ $p->id }}" class="foto-tempat-item {{ $pilihan === $p->id ? 'on' : '' }}" wire:click="$set('pilihan', {{ $p->id }})" aria-pressed="{{ $pilihan === $p->id ? 'true' : 'false' }}">
+                <span class="foto-tempat-ph">
+                    @if ($p->gambar)<img src="{{ $p->gambar }}" alt="" loading="lazy">@else<i class="bi bi-image" aria-hidden="true"></i>@endif
+                </span>
+                <b>{{ $p->nama }}</b>
+                <small>{{ $angka($totalPerTempat[$p->id] ?? 0) }} kunjungan {{ $tahun }}</small>
+            </button>
+        @endforeach
+    </div>
+@endif
+
 <h2 class="judul-tabel">Rincian per bulan</h2>
 <div class="tw">
     <table>

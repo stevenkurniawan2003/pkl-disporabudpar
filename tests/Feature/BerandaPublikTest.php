@@ -66,7 +66,7 @@ class BerandaPublikTest extends TestCase
                 'Destinasi unggulan', 'Lihat peta wisata',
                 'Bidang dan UPTD', 'Pariwisata', 'UPTD Olahraga',
                 'Berita terbaru', 'Semua berita',
-                'Kunjungan wisatawan', 'Kunjungan hotel',
+                'Kunjungan Wisatawan', 'Kunjungan Hotel',
             ])
             ->assertDontSee('Kartu induk kesenian') // bagian Layanan sudah dihapus
             ->assertDontSee('521.343') // angka contoh desain sudah tidak ditulis langsung
@@ -123,9 +123,9 @@ class BerandaPublikTest extends TestCase
 
         $this->get('/publik/beranda')
             ->assertOk()
-            ->assertSee("Kunjungan wisatawan, Januari–September {$tahun}")
+            ->assertSee("Kunjungan Wisatawan Januari–September {$tahun}")
             ->assertSee('521.343')
-            ->assertSee("Kunjungan hotel, Januari–Maret {$tahun}")
+            ->assertSee("Kunjungan Hotel Januari–Maret {$tahun}")
             ->assertSee('71.954')
             ->assertSee(route('publik.kunjungan-wisata', ['tahun' => $tahun]), false);
     }

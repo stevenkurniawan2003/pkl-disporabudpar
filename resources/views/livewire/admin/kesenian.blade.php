@@ -1,5 +1,5 @@
 <div>
-    <x-admin.topbar judul="Kesenian" sub="Data kesenian Kabupaten Jember untuk halaman Kebudayaan" />
+    <x-admin.topbar judul="Data Master Kesenian" sub="Pusat data sanggar/komunitas/lembaga kebudayaan untuk Kartu Induk Kesenian" />
 
     @if ($pesan)
         <div class="alert {{ $jenisPesan }}" role="{{ $jenisPesan === 'err' ? 'alert' : 'status' }}" wire:key="pesan-{{ md5($pesan) }}">
@@ -9,46 +9,59 @@
     @endif
 
     <div class="bar-tools">
-        <input type="search" wire:model.live.debounce.300ms="cari" placeholder="Cari nama atau asal daerah kesenian…" aria-label="Cari kesenian">
-        <select wire:model.live="kategori" aria-label="Filter kategori">
-            <option value="">Semua kategori</option>
-            @foreach ($daftarKategori as $k)
-                <option value="{{ $k }}">{{ $k }}</option>
+        <select wire:model.live="kolom" aria-label="Cari berdasarkan">
+            @foreach ($kolomCari as $nilai => $label)
+                <option value="{{ $nilai }}">{{ $label }}</option>
             @endforeach
         </select>
-        <button type="button" class="btn p" wire:click="$dispatchTo('admin.kesenian-form', 'buka-form-kesenian')">+ Tambah kesenian</button>
+        <input type="search" wire:model.live.debounce.300ms="cari" placeholder="Cari data…" aria-label="Cari data kesenian">
+        <button type="button" class="btn p" wire:click="$dispatchTo('admin.kesenian-form', 'buka-form-kesenian')">+ Input Data Master</button>
     </div>
 
     <div class="tw">
         <table>
             <thead>
                 <tr>
+                    <th>Nomor induk</th>
                     <th>Nama kesenian</th>
-                    <th>Kategori</th>
-                    <th>Asal daerah</th>
+                    <th>Nama pemilik</th>
+                    <th>Jenis kesenian</th>
+                    <th>Alamat</th>
+                    <th>Kecamatan</th>
+                    <th>Desa</th>
+                    <th class="n">Anggota</th>
+                    <th>Telp</th>
+                    <th>Status</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 @forelse ($daftar as $k)
                     <tr wire:key="kesenian-{{ $k->id_kesenian }}">
+                        <td><b>{{ $k->nomor_induk }}</b></td>
                         <td>{{ $k->nama_kesenian }}</td>
-                        <td><span class="bd g">{{ $k->kategori }}</span></td>
-                        <td>{{ $k->asal_daerah ?? '–' }}</td>
+                        <td>{{ $k->nama_pemilik }}</td>
+                        <td>{{ $k->jenis_lengkap }}</td>
+                        <td>{{ $k->alamat }}</td>
+                        <td>{{ $k->kecamatan->nama ?? '–' }}</td>
+                        <td>{{ $k->desa->nama ?? '–' }}</td>
+                        <td class="n">{{ $k->jumlah_anggota }}</td>
+                        <td>{{ $k->no_telepon ?? '–' }}</td>
+                        <td><span class="bd {{ $k->status === 'aktif' ? 'g' : 'warn' }}">{{ $k->status_label }}</span></td>
                         <td>
                             <div class="act">
                                 <button type="button" class="btn s" wire:click="lihatDetail({{ $k->id_kesenian }})">Detail</button>
                                 <button type="button" class="btn s" wire:click="$dispatchTo('admin.kesenian-form', 'buka-form-kesenian', { id: {{ $k->id_kesenian }} })">Ubah</button>
                                 <button type="button" class="btn s d"
                                         wire:click="hapus({{ $k->id_kesenian }})"
-                                        wire:confirm="Hapus kesenian &quot;{{ $k->nama_kesenian }}&quot;? Data ini dihapus permanen.">Hapus</button>
+                                        wire:confirm="Hapus kesenian &quot;{{ $k->nama_kesenian }}&quot; ({{ $k->nomor_induk }})? Riwayat perpanjangan KIK dan foto-fotonya ikut terhapus permanen.">Hapus</button>
                             </div>
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="4" class="empty">
-                        @if ($cari !== '' || $kategori !== '') Tidak ada kesenian yang cocok dengan pencarian.
-                        @else Belum ada data kesenian. Klik "+ Tambah kesenian" untuk mulai.
+                    <tr><td colspan="11" class="empty">
+                        @if ($cari !== '') Tidak ada data yang cocok dengan "{{ $cari }}".
+                        @else Belum ada data kesenian. Klik "+ Input Data Master" untuk mulai.
                         @endif
                     </td></tr>
                 @endforelse
@@ -74,12 +87,33 @@
                 </div>
 
                 <div class="mb">
-                    <div class="info full"><small>Nama kesenian</small><b>{{ $detail->nama_kesenian }}</b></div>
-                    <div class="info"><small>Kategori</small><p>{{ $detail->kategori }}</p></div>
-                    <div class="info"><small>Asal daerah</small><p>{{ $detail->asal_daerah ?? '–' }}</p></div>
-                    <div class="info full"><small>Deskripsi</small><p>{!! nl2br(e($detail->deskripsi)) !!}</p></div>
-                    <div class="info"><small>Ditambahkan</small><p>{{ $detail->created_at?->locale('id')->translatedFormat('j F Y, H:i') ?? '–' }}</p></div>
-                    <div class="info"><small>Terakhir diubah</small><p>{{ $detail->updated_at?->locale('id')->translatedFormat('j F Y, H:i') ?? '–' }}</p></div>
+                    <div class="info"><small>Nomor induk</small><b>{{ $detail->nomor_induk }}</b></div>
+                    <div class="info"><small>Status</small><p>{{ $detail->status_label }}</p></div>
+                    <div class="info"><small>Nama kesenian</small><p>{{ $detail->nama_kesenian }}</p></div>
+                    <div class="info"><small>Nama pemilik</small><p>{{ $detail->nama_pemilik }}</p></div>
+                    <div class="info full"><small>Jenis kesenian</small><p>{{ $detail->jenis_lengkap }}</p></div>
+                    <div class="info full"><small>Alamat</small><p>{{ $detail->alamat_lengkap }}</p></div>
+                    <div class="info"><small>Jumlah anggota</small><p>{{ $detail->jumlah_anggota }} orang</p></div>
+                    <div class="info"><small>Nomor telepon</small><p>{{ $detail->no_telepon ?? '–' }}</p></div>
+                    <div class="info full">
+                        <small>Dokumentasi kegiatan</small>
+                        @if ($detail->dokumentasi_url)
+                            <a class="galeri-item" href="{{ $detail->dokumentasi_url }}" target="_blank" rel="noopener" style="max-width:240px"><img src="{{ $detail->dokumentasi_url }}" alt="Dokumentasi {{ $detail->nama_kesenian }}"></a>
+                        @else
+                            <p>–</p>
+                        @endif
+                    </div>
+                    <div class="info full">
+                        <small>Riwayat perpanjangan KIK</small>
+                        @forelse ($detail->perpanjangan as $p)
+                            <p wire:key="riwayat-{{ $p->id_perpanjangan }}">
+                                {{ $p->tanggal_pengajuan->locale('id')->translatedFormat('j F Y') }} s.d. {{ $p->berlaku_sampai->locale('id')->translatedFormat('j F Y') }}
+                                · <a href="{{ route('admin.kartu-kik', $p) }}" target="_blank" rel="noopener">Unduh kartu ↗</a>
+                            </p>
+                        @empty
+                            <p>Belum pernah mengajukan perpanjangan.</p>
+                        @endforelse
+                    </div>
                 </div>
 
                 <div class="mf">

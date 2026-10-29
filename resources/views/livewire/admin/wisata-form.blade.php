@@ -108,6 +108,12 @@
                     </div>
 
                     <div class="fd full">
+                        <label for="nomor_sk_desa_wisata">Nomor SK Bupati desa wisata <span class="opsional">(opsional, khusus kategori Desa wisata)</span></label>
+                        <input id="nomor_sk_desa_wisata" type="text" wire:model="nomor_sk_desa_wisata" placeholder="Contoh: 188.45/123/1.12/2024">
+                        @error('nomor_sk_desa_wisata') <small class="err-msg">{{ $message }}</small> @enderror
+                    </div>
+
+                    <div class="fd full">
                         <label>Tampilkan di beranda publik (unggulan)</label>
                         <button type="button" class="tg {{ $unggulan ? 'on' : '' }}" wire:click="$toggle('unggulan')" aria-label="Unggulan" aria-pressed="{{ $unggulan ? 'true' : 'false' }}"></button>
                     </div>

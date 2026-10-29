@@ -43,4 +43,24 @@ return [
     // Lama (detik) angka pengunjung di footer di-cache.
     'cache_pengunjung' => 300,
 
+    // Kop surat & penanda tangan dokumen unduhan (Kartu Induk Kesenian, cetak data). Ganti lewat .env saat pejabat berganti.
+    'kop' => [
+        'pemerintah' => 'Pemerintah Kabupaten Jember',
+        'dinas' => 'Dinas Kepemudaan dan Olahraga, Kebudayaan dan Pariwisata',
+        'alamat' => env('SITE_KOP_ALAMAT', 'Jl. MH. Thamrin, Ajung Kulon, Kec. Ajung, Kab. Jember (68175)'),
+        'alamat_2' => env('SITE_KOP_ALAMAT_2', 'Kompleks Stadion Jember Sport Garden (JSG)'),
+    ],
+    'pejabat' => [
+        'kepala_dinas' => [
+            'jabatan' => 'Kepala Dinas Kepemudaan dan Olahraga, Kebudayaan dan Pariwisata Kabupaten Jember',
+            'nama' => env('KEPALA_DINAS_NAMA', 'BOBBY ARIE SANDY, S.STP., M.M.'),
+            'nip' => env('KEPALA_DINAS_NIP', '197703071996121001'),
+        ],
+        'kabid_kebudayaan' => [
+            'jabatan' => 'Kepala Bidang Kebudayaan',
+            'nama' => env('KABID_KEBUDAYAAN_NAMA', ''),
+            'nip' => env('KABID_KEBUDAYAAN_NIP', ''),
+        ],
+    ],
+
 ];

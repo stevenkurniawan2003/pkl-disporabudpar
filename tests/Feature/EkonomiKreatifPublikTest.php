@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Livewire\Publik\EkonomiKreatif;
+use App\Livewire\Publik\PencarianEkraf;
+use App\Models\Desa;
 use App\Models\Ekraf;
+use App\Models\Kecamatan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -12,107 +15,55 @@ class EkonomiKreatifPublikTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function ekraf(string $usaha, string $subsektor = 'Kuliner', array $atribut = []): Ekraf
+    public function test_data_ekraf_jember_menghitung_aktif_nonaktif_dan_grafik(): void
     {
-        return Ekraf::create(array_merge([
-            'nama_usaha' => $usaha,
-            'nama_pemilik' => "Pemilik {$usaha}",
-            'subsektor' => $subsektor,
-            'alamat' => 'Kec. Kaliwates',
-            'deskripsi' => "Deskripsi {$usaha}.",
-        ], $atribut));
-    }
-
-    public function test_kartu_menampilkan_data_dan_menyembunyikan_kontak_kosong(): void
-    {
-        $this->ekraf('Cokelat Raddina', 'Kuliner', ['no_telepon' => '0812 3456 789', 'media_sosial' => 'https://instagram.com/raddina']);
-        $this->ekraf('Pengrajin Kentongan', 'Kriya', ['alamat' => 'Kec. Ambulu']);
+        Ekraf::factory()->subsektor('1.9')->count(2)->create();
+        Ekraf::factory()->subsektor('1.8')->nonaktif()->create();
 
         $this->get('/publik/ekonomi-kreatif')
             ->assertOk()
-            ->assertSee('<title>Ekonomi Kreatif · Disporabudpar Jember</title>', false)
-            ->assertSee('Cokelat Raddina')
-            ->assertSee('Pemilik Cokelat Raddina')
-            ->assertSee('tel:08123456789', false)
-            ->assertSee('href="https://instagram.com/raddina"', false)
-            ->assertSee('bi-instagram', false)
-            ->assertSee('Kec. Ambulu')
-            ->assertSee('🍜')
-            ->assertSee('🏺')
-            ->assertSee('class="nb on" href="'.route('publik.ekonomi-kreatif').'"', false);
+            ->assertSee('<title>Data EKRAF Jember · Disporabudpar Jember</title>', false)
+            ->assertSee('Lihat Rincian')
+            ->assertSee('id="grafik-ekraf-subsektor"', false)
+            ->assertSee('id="grafik-ekraf-kecamatan"', false);
 
-        // Usaha tanpa telepon & medsos tidak punya baris aksi.
-        $this->assertSame(1, substr_count(
-            $this->get('/publik/ekonomi-kreatif')->getContent(),
-            'class="aksi-ekraf"'
-        ));
+        $komponen = Livewire::test(EkonomiKreatif::class)
+            ->assertViewHas('jumlahAktif', 2)
+            ->assertViewHas('jumlahNonaktif', 1);
+
+        $subsektor = collect($komponen->viewData('daftarGrafik'))->firstWhere('id', 'grafik-ekraf-subsektor');
+        $this->assertCount(17, $subsektor['label']);
+        $this->assertSame('1.9 Kuliner', $subsektor['label'][8]);
+        $this->assertSame(2, $subsektor['seri'][0]['data'][8]);
     }
 
-    public function test_filter_subsektor_dan_pencarian(): void
+    public function test_menu_ekonomi_kreatif_berisi_sistem_ekraf_tanpa_wire_navigate(): void
     {
-        $this->ekraf('Cokelat Raddina', 'Kuliner');
-        $this->ekraf('Pengrajin Kentongan', 'Kriya');
-        $this->ekraf('Studio Foto Heritage', 'Fotografi', ['alamat' => 'Jl. Sultan Agung']);
-
-        Livewire::test(EkonomiKreatif::class)
-            ->assertViewHas('daftarSubsektor', ['Kuliner', 'Kriya', 'Fotografi'])
-            ->call('pilihSubsektor', 'Kriya')
-            ->assertSee('Pengrajin Kentongan')
-            ->assertDontSee('Cokelat Raddina')
-            ->call('pilihSubsektor', 'Semua')
-            ->set('cari', 'cokelat')
-            ->assertSee('Cokelat Raddina')
-            ->assertDontSee('Pengrajin Kentongan')
-            ->set('cari', 'sultan') // cari juga lewat alamat
-            ->assertSee('Studio Foto Heritage')
-            ->set('cari', 'tidak-ada')
-            ->assertSee('Tidak ada usaha yang cocok');
-    }
-
-    public function test_pagination_12_per_halaman(): void
-    {
-        foreach (range(1, 13) as $i) {
-            $this->ekraf(sprintf('Usaha %02d', $i));
-        }
-
-        Livewire::test(EkonomiKreatif::class)
-            ->assertViewHas('daftar', fn ($d) => $d->count() === 12 && $d->lastPage() === 2)
-            ->call('nextPage')
-            ->assertSee('Usaha 13');
-    }
-
-    public function test_detail_deskripsi_lengkap_kontak_dan_usaha_serupa(): void
-    {
-        $e = $this->ekraf('Cokelat Raddina', 'Kuliner', [
-            'deskripsi' => "Cokelat khas Jember <b>asli</b>.\n\nTersedia oleh-oleh.",
-            'media_sosial' => 'https://facebook.com/raddina',
-        ]);
-        $this->ekraf('Keripik Presto', 'Kuliner');
-        $this->ekraf('Batik Tembakau', 'Fesyen');
-
-        $this->get('/publik/ekonomi-kreatif/'.$e->id_ekraf)
+        $this->get('/publik/ekonomi-kreatif/pencarian')
             ->assertOk()
-            ->assertSee('<title>Cokelat Raddina · Disporabudpar Jember</title>', false)
-            ->assertSee('Pemilik: Pemilik Cokelat Raddina')
-            ->assertSee('Tersedia oleh-oleh.')
-            ->assertSee('&lt;b&gt;asli&lt;/b&gt;', false)
-            ->assertSee('Kunjungi Facebook')
-            ->assertSee('Usaha kuliner lainnya')
-            ->assertSee('Keripik Presto')
-            ->assertDontSee('Batik Tembakau')
-            ->assertSee('class="nb on" href="'.route('publik.ekonomi-kreatif').'"', false);
+            ->assertSee('Ekonomi Kreatif ▾')
+            ->assertSee('class="nb on" href="'.route('publik.pencarian-ekraf').'"', false)
+            ->assertSee('<a class="nb" href="'.route('admin.ekonomi-kreatif').'">Sistem EKRAF', false);
     }
 
-    public function test_platform_sosmed_dikenali_dari_link(): void
+    public function test_pencarian_filter_kecamatan_desa_subsektor_tanpa_data_pribadi(): void
     {
-        $this->assertNull($this->ekraf('A')->platform_sosmed);
-        $this->assertSame('TikTok', $this->ekraf('B', 'Kuliner', ['media_sosial' => 'https://www.tiktok.com/@b'])->platform_sosmed['nama']);
-        $this->assertSame(['nama' => 'Media sosial', 'ikon' => 'link-45deg'], $this->ekraf('C', 'Kuliner', ['media_sosial' => 'https://linktr.ee/c'])->platform_sosmed);
-    }
+        $patrang = Kecamatan::create(['nama' => 'Patrang']);
+        $slawu = Desa::create(['kecamatan_id' => $patrang->id, 'nama' => 'Slawu']);
+        Ekraf::factory()->create(['nama_usaha' => 'Tas Anyaman', 'no_telepon' => '081299990000', 'omzet' => 7654321]);
+        Ekraf::factory()->subsektor('1.17')->create(['nama_usaha' => 'Mural Patrang', 'kecamatan_id' => $patrang->id, 'desa_id' => $slawu->id]);
 
-    public function test_detail_404_dan_tanpa_data(): void
-    {
-        $this->get('/publik/ekonomi-kreatif/999')->assertNotFound();
-        $this->get('/publik/ekonomi-kreatif')->assertOk()->assertSee('Belum ada data ekonomi kreatif');
+        $this->get('/publik/ekonomi-kreatif/pencarian')
+            ->assertOk()
+            ->assertSee('Tas Anyaman')
+            ->assertDontSee('081299990000')
+            ->assertDontSee('7.654.321');
+
+        Livewire::test(PencarianEkraf::class)
+            ->set('kecamatan', (string) $patrang->id)->assertSee('Mural Patrang')->assertDontSee('Tas Anyaman')
+            ->set('desa', (string) $slawu->id)->assertSee('Mural Patrang')
+            ->set('kecamatan', '')->assertSet('desa', '')
+            ->set('subsektor', '1.8')->assertSee('Tas Anyaman')->assertDontSee('Mural Patrang')
+            ->call('resetFilter')->assertSet('subsektor', '')->assertSee('Mural Patrang');
     }
 }

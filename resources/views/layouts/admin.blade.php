@@ -10,8 +10,29 @@
         'Data Master' => [
             ['📍', 'Wisata', 'admin.wisata', 'admin.wisata*'],
             ['🏨', 'Hotel', 'admin.hotel', 'admin.hotel'],
-            ['🎭', 'Kesenian', 'admin.kesenian', 'admin.kesenian*'],
-            ['🎨', 'Ekraf', 'admin.ekonomi-kreatif', 'admin.ekonomi-kreatif*'],
+        ],
+        'Ekonomi Kreatif' => [
+            ['🎨', 'Data Master EKRAF', 'admin.ekonomi-kreatif', 'admin.ekonomi-kreatif'],
+            ['🖨', 'Cetak Data EKRAF', 'admin.cetak-ekraf', 'admin.cetak-ekraf'],
+        ],
+        'PPO' => [
+            ['🏃', 'Database Atlet', 'admin.ppo-atlet', 'admin.ppo-atlet'],
+            ['📋', 'Database Pelatih', 'admin.ppo-pelatih', 'admin.ppo-pelatih'],
+            ['🏅', 'Database Cabor', 'admin.ppo-cabor', 'admin.ppo-cabor'],
+            ['🥇', 'Data Atlet Berprestasi', 'admin.ppo-prestasi', 'admin.ppo-prestasi'],
+            ['📸', 'Galeri Prestasi', 'admin.ppo-galeri', 'admin.ppo-galeri'],
+        ],
+        'Kebudayaan' => [
+            ['🏺', 'Objek Pemajuan Kebudayaan', 'admin.opk', 'admin.opk'],
+            ['🏛', 'Cagar Budaya', 'admin.cagar-budaya', 'admin.cagar-budaya'],
+            ['🎭', 'Data Master Kesenian', 'admin.kesenian', 'admin.kesenian'],
+            ['🪪', 'Perpanjangan KIK', 'admin.perpanjangan-kik', 'admin.perpanjangan-kik'],
+            ['🖨', 'Cetak Data Kesenian', 'admin.cetak-kesenian', 'admin.cetak-kesenian'],
+        ],
+        'Pariwisata' => [
+            ['🗺', 'Lokasi Peta', 'admin.lokasi-peta', 'admin.lokasi-peta'],
+            ['🎒', 'Paket Wisata', 'admin.paket-wisata', 'admin.paket-wisata'],
+            ['📘', 'E-Booklet', 'admin.ebooklet', 'admin.ebooklet'],
         ],
         'Kelola Data Kunjungan' => [
             ['📈', 'Data Kunjungan Wisata', 'admin.kunjungan-wisata', 'admin.kunjungan-wisata*'],

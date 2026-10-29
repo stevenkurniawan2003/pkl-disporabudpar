@@ -3,11 +3,15 @@
 namespace Tests\Feature;
 
 use App\Livewire\Publik\PetaWisata;
+use App\Models\Cabor;
+use App\Models\CagarBudaya;
+use App\Models\Ekraf;
 use App\Models\GaleriHotel;
 use App\Models\GaleriWisata;
 use App\Models\Hotel;
 use App\Models\KategoriWisata;
 use App\Models\Kecamatan;
+use App\Models\LokasiPeta;
 use App\Models\User;
 use App\Models\Wisata;
 use Database\Seeders\KategoriSeeder;
@@ -56,47 +60,54 @@ class PetaDanDetailDestinasiTest extends TestCase
         ], $atribut));
     }
 
-    public function test_peta_berisi_titik_wisata_dan_hotel_valid_saja(): void
+    public function test_peta_berlapis_berisi_titik_valid_per_kategori(): void
     {
         $papuma = $this->wisata('Papuma');
+        $desa = $this->wisata('Desa Tutul', ['kategori_id' => KategoriWisata::where('slug', 'desa-wisata')->value('id')]);
+        $kuliner = $this->wisata('Rumah Makan Pecel', ['kategori_id' => KategoriWisata::where('slug', 'kuliner')->value('id')]);
         $this->wisata('Masih Draf', ['status' => 'draf']);
         $this->wisata('Titik Nol', ['latitude' => 0, 'longitude' => 0]);
         $this->wisata('Dihapus')->delete();
         $bintang = $this->hotel('Hotel Bintang');
+        LokasiPeta::create(['nama' => 'Pusat Suwar-Suwir', 'kategori' => 'oleh-oleh', 'alamat' => 'Jl. Trunojoyo', 'latitude' => -8.17, 'longitude' => 113.70]);
+        CagarBudaya::factory()->create(['nama' => 'Situs Duplang']);
+        Ekraf::factory()->create(['nama_usaha' => 'Tanpa Titik']);
+        Ekraf::factory()->create(['nama_usaha' => 'Batik Jember', 'latitude' => -8.2, 'longitude' => 113.6]);
+        Ekraf::factory()->nonaktif()->create(['nama_usaha' => 'Tutup', 'latitude' => -8.2, 'longitude' => 113.6]);
+        Cabor::factory()->create(['kode_cabor' => 'atletik', 'latitude' => -8.16, 'longitude' => 113.7]);
 
-        Livewire::test(PetaWisata::class)
-            ->assertViewHas('titik', function (array $titik) use ($papuma, $bintang) {
-                $kunci = array_column($titik, 'kunci');
-                sort($kunci);
+        $komponen = Livewire::test(PetaWisata::class);
+        $titik = collect($komponen->viewData('titikBerlapis'));
 
-                return $kunci === ['h-'.$bintang->id_hotel, 'w-'.$papuma->id]
-                    && collect($titik)->firstWhere('jenis', 'hotel')['url'] === route('publik.detail-hotel', $bintang)
-                    && collect($titik)->firstWhere('jenis', 'hotel')['teks'] === 'Singkat Hotel Bintang.'
-                    && collect($titik)->firstWhere('jenis', 'wisata')['url'] === route('publik.detail-wisata', $papuma)
-                    && collect($titik)->firstWhere('jenis', 'wisata')['teks'] === 'Narasi lengkap Papuma.';
-            })
-            ->assertSee('Papuma')
-            ->assertSee('Hotel Bintang');
+        $this->assertSame(
+            ['cabor', 'desa-wisata', 'ekraf', 'hotel', 'objek-wisata', 'oleh-oleh', 'restoran', 'situs-budaya'],
+            $titik->pluck('jenis')->sort()->values()->all()
+        );
+        $this->assertSame(route('publik.detail-hotel', $bintang), $titik->firstWhere('jenis', 'hotel')['url']);
+        $this->assertSame('w-'.$papuma->id, $titik->firstWhere('jenis', 'objek-wisata')['kunci']);
+        $this->assertSame('w-'.$desa->id, $titik->firstWhere('jenis', 'desa-wisata')['kunci']);
+        $this->assertSame('w-'.$kuliner->id, $titik->firstWhere('jenis', 'restoran')['kunci']);
+        $this->assertNull($titik->firstWhere('jenis', 'oleh-oleh')['url']);
+        $this->assertSame('Batik Jember', $titik->firstWhere('jenis', 'ekraf')['nama']);
+
+        $jumlah = $komponen->viewData('lapisan')->pluck('jumlah', 'kunci');
+        $this->assertSame(1, $jumlah['ekraf']);
+        $this->assertSame(0, $jumlah['seni-budaya']);
+        $komponen->assertSee('Situs Budaya (1)');
     }
 
-    public function test_filter_wisata_saja_hotel_saja_dan_kategori(): void
+    public function test_peta_obyek_wisata_hanya_wisata_dan_filter_kategori(): void
     {
-        $this->wisata('Papuma');
+        $papuma = $this->wisata('Papuma');
         $this->wisata('Rembangan', ['kategori_id' => KategoriWisata::where('nama', 'Pegunungan')->value('id')]);
         $this->hotel('Hotel Bintang');
 
         Livewire::test(PetaWisata::class)
-            ->call('pilihJenis', 'hotel')
-            ->assertDispatched('peta-diperbarui', fn ($n, $p) => count($p['titik']) === 1 && $p['titik'][0]['jenis'] === 'hotel')
-            ->assertDontSee('Rembangan')
-            ->call('pilihJenis', 'wisata')
-            ->assertDispatched('peta-diperbarui', fn ($n, $p) => count($p['titik']) === 2)
-            ->assertDontSee('Hotel Bintang')
-            ->call('pilihJenis', 'semua')
+            ->assertViewHas('titik', fn (array $t) => count($t) === 2
+                && collect($t)->firstWhere('nama', 'Papuma')['url'] === route('publik.detail-wisata', $papuma)
+                && collect($t)->firstWhere('nama', 'Papuma')['teks'] === 'Narasi lengkap Papuma.')
             ->call('pilihKategori', 'Pegunungan')
-            ->assertDispatched('peta-diperbarui', fn ($n, $p) => count($p['titik']) === 1 && $p['titik'][0]['nama'] === 'Rembangan')
-            ->call('pilihJenis', 'tidak-ada')
-            ->assertSet('jenis', 'semua');
+            ->assertDispatched('peta-obyek-diperbarui', fn ($n, $p) => count($p['titik']) === 1 && $p['titik'][0]['nama'] === 'Rembangan');
     }
 
     public function test_halaman_peta_bisa_dibuka_dan_memuat_leaflet(): void
@@ -106,7 +117,10 @@ class PetaDanDetailDestinasiTest extends TestCase
         $this->get('/publik/peta-wisata')
             ->assertOk()
             ->assertSee('leaflet.min.js', false)
-            ->assertSee('data-kunci="w-', false);
+            ->assertSee('data-kunci="w-', false)
+            ->assertSee('Peta Obyek Wisata')
+            ->assertSee('Cari nama obyek wisata')
+            ->assertSee('Desa Wisata (0)');
     }
 
     public function test_detail_wisata_dengan_galeri_dan_link_maps(): void

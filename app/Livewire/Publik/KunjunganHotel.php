@@ -31,8 +31,8 @@ class KunjunganHotel extends HalamanKunjungan
 
     protected function daftarPilihan(): Collection
     {
-        return Hotel::orderBy('nama_hotel')->get(['id_hotel', 'nama_hotel'])
-            ->map(fn (Hotel $h) => (object) ['id' => $h->id_hotel, 'nama' => $h->nama_hotel]);
+        return Hotel::orderBy('nama_hotel')->get(['id_hotel', 'nama_hotel', 'gambar_utama'])
+            ->map(fn (Hotel $h) => (object) ['id' => $h->id_hotel, 'nama' => $h->nama_hotel, 'gambar' => $h->gambar_url]);
     }
 
     protected function rekapPerTempat(Builder $query): Collection
@@ -46,6 +46,7 @@ class KunjunganHotel extends HalamanKunjungan
             ->toBase()
             ->get()
             ->map(fn ($r) => (object) [
+                'id' => (int) $r->id_hotel,
                 'nama' => $r->nama_hotel,
                 'url' => route('publik.detail-hotel', $r->id_hotel),
                 'domestik' => (int) $r->domestik,

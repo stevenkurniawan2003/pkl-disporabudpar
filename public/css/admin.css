@@ -93,9 +93,30 @@ nav a i{width:18px;text-align:center;font-style:normal}
 .thumb img{max-width:220px;max-height:150px;border-radius:10px;border:1px solid var(--line);display:block;object-fit:cover}
 .pgn{display:inline-flex;gap:10px;align-items:center}
 .pgn .btn[disabled]{opacity:.45;cursor:not-allowed}
-.login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
-.login-card{width:min(400px,100%);padding:26px}
-.login-form{display:flex;flex-direction:column;gap:14px}
+.login-wrap{min-height:100vh;padding:0;background:var(--bg2)}
+.login-shell{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
+.login-side{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;padding:40px 44px;color:#fff;background:linear-gradient(140deg,#E8487F 0%,#B0245A 100%)}
+.login-side .brand{padding:0}.login-side .logo{background:#fff;color:#B0245A}.login-side .brand small,.login-side>small{color:rgba(255,255,255,.8)}
+.login-side h2{font-size:clamp(26px,3vw,36px);line-height:1.15;margin:0 0 12px;font-weight:700;max-width:420px}
+.login-side p{margin:0;max-width:420px;opacity:.92}
+.login-deko{position:absolute;right:-90px;bottom:-90px;width:380px;opacity:.18;pointer-events:none}
+.login-main{position:relative;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 24px 40px}
+.login-back{position:absolute;top:22px;left:24px;display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--ink);font-weight:600;font-size:13px;text-decoration:none;transition:border-color .2s,color .2s}
+.login-back:hover{border-color:var(--pink);color:var(--pinkink)}
+.login-card{width:100%;max-width:400px;padding:32px 28px;background:var(--bg);border:1px solid var(--line);border-radius:20px;box-shadow:0 12px 40px rgba(176,36,90,.08)}
+.login-card h1{font-size:22px;margin:0 0 6px}
+.login-sub{margin:0 0 22px;color:var(--mut)}
+.login-brand-hp{display:none;padding:0 0 18px}
+.login-form{display:flex;flex-direction:column;gap:16px}
+.inp-ikon{position:relative}
+.inp-ikon>svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--mut);pointer-events:none}
+.fd .inp-ikon input{padding:11px 44px 11px 40px;transition:border-color .2s,box-shadow .2s}
+.fd .inp-ikon input:focus{outline:0;border-color:var(--pink);box-shadow:0 0 0 3px var(--pink2)}
+.inp-ikon .mata{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:8px;background:none;color:var(--mut);cursor:pointer;display:grid;place-items:center}
+.inp-ikon .mata:hover{background:var(--bg2);color:var(--pinkink)}.inp-ikon .mata svg{width:18px;height:18px}
+.login-btn{width:100%;padding:11px 14px;font-size:15px;margin-top:4px}.login-btn:hover{filter:brightness(1.05)}
+[x-cloak]{display:none!important}
+@media(max-width:860px){.login-shell{grid-template-columns:minmax(0,1fr)}.login-side{display:none}.login-brand-hp{display:flex}.login-main{justify-content:flex-start;padding:76px 16px 32px}.login-back{left:16px;top:16px}.login-card{padding:26px 20px}}
 .login-form .cek{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut)}
 .login-form .cek input{width:auto}
 .galeri{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-top:8px}
@@ -144,3 +165,18 @@ th.n{text-align:right}
 .isi-kaya blockquote{margin:0 0 10px;padding:6px 12px;border-left:3px solid var(--pink);color:var(--mut)}
 .isi-kaya a{color:var(--pinkink);font-weight:600}
 .grafik-kartu+.grafik-kartu{margin-top:20px}
+
+/* Grafik garis kategori (partial publik grafik-garis, dipakai juga di Data Master EKRAF) & slider omzet */
+.grafik-kartu{--seri-1:#E8487F;--seri-2:#2a78d6}
+:root[data-theme="dark"] .grafik-kartu{--seri-2:#3987e5}
+.grafik-wadah.lebar{height:380px}
+.omzet{display:grid;grid-template-columns:1fr 160px auto;gap:10px;align-items:center}
+.omzet input[type=range]{padding:0;accent-color:var(--pink)}
+.omzet b{color:var(--ok);white-space:nowrap}
+@media(max-width:640px){.omzet{grid-template-columns:1fr}}
+
+/* Warna garis tambahan (PPO): total/emas, perunggu, perak */
+.grafik-kartu{--seri-3:#D99A00;--seri-4:#A0612B;--seri-5:#7D8A96}
+:root[data-theme="dark"] .grafik-kartu{--seri-3:#F2B829;--seri-4:#D08A4E;--seri-5:#AEB8C2}
+.bd.medali.emas{background:#FFF3C4;color:#8A6200}.bd.medali.perak{background:#ECEFF2;color:#4F5B66}.bd.medali.perunggu{background:#F7E3D3;color:#8A4B1C}
+.galeri-item video{display:block;background:#000}

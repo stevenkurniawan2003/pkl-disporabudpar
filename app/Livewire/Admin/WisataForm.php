@@ -49,6 +49,9 @@ class WisataForm extends Component
 
     public string $link_google_maps = '';
 
+    /** Nomor SK Bupati penetapan desa wisata (saran dokumen konsep Pariwisata). */
+    public string $nomor_sk_desa_wisata = '';
+
     public string $status = 'tayang';
 
     public bool $unggulan = false;
@@ -86,6 +89,7 @@ class WisataForm extends Component
             $this->latitude = (string) $wisata->latitude;
             $this->longitude = (string) $wisata->longitude;
             $this->link_google_maps = (string) $wisata->link_google_maps;
+            $this->nomor_sk_desa_wisata = (string) $wisata->nomor_sk_desa_wisata;
             $this->status = $wisata->status;
             $this->unggulan = $wisata->unggulan;
             $this->gambarLama = $wisata->gambar_utama;
@@ -123,6 +127,7 @@ class WisataForm extends Component
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'link_google_maps' => ['nullable', 'url:http,https', 'max:255'],
+            'nomor_sk_desa_wisata' => ['nullable', 'string', 'max:120'],
             'status' => ['required', 'in:tayang,draf'],
             'unggulan' => ['boolean'],
             'gambarBaru' => ['nullable', ...self::ATURAN_GAMBAR],
@@ -159,6 +164,7 @@ class WisataForm extends Component
             'latitude' => 'Latitude',
             'longitude' => 'Longitude',
             'link_google_maps' => 'Link Google Maps',
+            'nomor_sk_desa_wisata' => 'Nomor SK Bupati',
             'status' => 'Status',
             'gambarBaru' => 'Gambar utama',
             'galeri.*.keterangan' => 'Keterangan foto',
@@ -249,6 +255,7 @@ class WisataForm extends Component
             'latitude' => $data['latitude'],
             'longitude' => $data['longitude'],
             'link_google_maps' => $data['link_google_maps'] ?: null,
+            'nomor_sk_desa_wisata' => trim((string) $data['nomor_sk_desa_wisata']) ?: null,
             'status' => $data['status'],
             'unggulan' => $data['unggulan'],
         ];

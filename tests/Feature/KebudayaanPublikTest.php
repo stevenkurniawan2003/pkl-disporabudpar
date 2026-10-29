@@ -2,8 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Publik\DataKesenian;
 use App\Livewire\Publik\Kebudayaan;
+use App\Models\CagarBudaya;
+use App\Models\Desa;
+use App\Models\Kecamatan;
 use App\Models\Kesenian;
+use App\Models\Opk;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -12,91 +17,73 @@ class KebudayaanPublikTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function kesenian(string $nama, string $kategori = 'Tari', ?string $asal = 'Kec. Kalisat', ?string $deskripsi = null): Kesenian
+    public function test_dashboard_kartu_per_kelompok_dan_grafik_garis(): void
     {
-        return Kesenian::create([
-            'nama_kesenian' => $nama,
-            'kategori' => $kategori,
-            'asal_daerah' => $asal,
-            'deskripsi' => $deskripsi ?? "Deskripsi {$nama}.",
-        ]);
-    }
-
-    public function test_daftar_kartu_dengan_badge_asal_cuplikan_dan_ikon(): void
-    {
-        $this->kesenian('Tari Lahbako', 'Tari', 'Kec. Kalisat', '<b>Tari</b> '.str_repeat('petani tembakau ', 20));
-        $this->kesenian('Patrol', 'Musik', null);
+        Kesenian::factory()->jenis('1.2')->create();
+        Kesenian::factory()->jenis('2.5')->count(2)->create();
+        Kesenian::factory()->jenis('2.6')->nonaktif()->create();
+        Opk::factory()->create(['jenis' => 'Ritus']);
+        CagarBudaya::factory()->create(['kategori' => 'Bangunan', 'status' => 'CB']);
 
         $this->get('/publik/kebudayaan')
             ->assertOk()
             ->assertSee('<title>Kebudayaan · Disporabudpar Jember</title>', false)
-            ->assertSee('Tari Lahbako')
-            ->assertSee('Kec. Kalisat')
-            ->assertSee('Tari petani tembakau')
-            ->assertDontSee('<b>Tari</b>', false)
-            ->assertSee('💃')
-            ->assertSee('🥁')
-            ->assertSee('class="nb on" href="'.route('publik.kebudayaan').'"', false);
+            ->assertSee('Rincian data kesenian')
+            ->assertSee('chart.umd.min.js', false)
+            ->assertSee('id="grafik-kecamatan-kesenian"', false)
+            ->assertSee('type: &#039;line&#039;', false);
+
+        $komponen = Livewire::test(Kebudayaan::class)
+            ->assertViewHas('totalKesenian', 4)
+            ->assertViewHas('totalAktif', 3)
+            ->assertViewHas('totalOpk', 1)
+            ->assertViewHas('totalCagar', 1)
+            ->assertViewHas('perKelompok', fn ($k) => $k->pluck('jumlah', 'nama')->all() === ['Seni Musik' => 1, 'Seni Pertunjukan' => 3, 'Seni Sastra Tradisi' => 0]);
+
+        $grafik = collect($komponen->viewData('daftarGrafik'))->keyBy('id');
+        $this->assertSame(1, $grafik['grafik-opk']['seri'][0]['data'][array_search('Ritus', Opk::JENIS, true)]);
+        $cb = collect($grafik['grafik-cagar-budaya']['seri'])->firstWhere('label', 'CB (Cagar Budaya)');
+        $this->assertSame([0, 1, 0, 0, 0], $cb['data']);
     }
 
-    public function test_filter_kategori_hanya_yang_punya_data_dan_pencarian(): void
+    public function test_menu_kebudayaan_berupa_dropdown(): void
     {
-        $this->kesenian('Tari Lahbako', 'Tari', 'Kec. Kalisat');
-        $this->kesenian('Patrol Jember', 'Musik', 'Kec. Sumbersari');
-        $this->kesenian('Petik Laut', 'Upacara adat', 'Kec. Puger');
-
-        Livewire::test(Kebudayaan::class)
-            ->assertViewHas('daftarKategori', ['Tari', 'Musik', 'Upacara adat'])
-            ->call('pilihKategori', 'Upacara adat')
-            ->assertSee('Petik Laut')
-            ->assertDontSee('Tari Lahbako')
-            ->call('pilihKategori', 'Semua')
-            ->set('cari', 'puger') // cari juga lewat asal daerah
-            ->assertSee('Petik Laut')
-            ->assertDontSee('Patrol Jember')
-            ->set('cari', 'patrol')
-            ->assertSee('Patrol Jember')
-            ->set('cari', '50%')
-            ->assertSee('Tidak ada kesenian yang cocok');
-    }
-
-    public function test_pagination_12_per_halaman(): void
-    {
-        foreach (range(1, 13) as $i) {
-            $this->kesenian(sprintf('Kesenian %02d', $i));
-        }
-
-        Livewire::test(Kebudayaan::class)
-            ->assertViewHas('daftar', fn ($d) => $d->count() === 12 && $d->lastPage() === 2)
-            ->call('nextPage')
-            ->assertSee('Kesenian 13');
-    }
-
-    public function test_detail_deskripsi_lengkap_dan_kesenian_serupa(): void
-    {
-        $tari = $this->kesenian('Tari Lahbako', 'Tari', 'Kec. Kalisat', "Paragraf satu <script>x</script>.\n\nParagraf dua.");
-        $this->kesenian('Tari Kecak Jember', 'Tari');
-        $this->kesenian('Patrol', 'Musik');
-
-        $this->get('/publik/kebudayaan/'.$tari->id_kesenian)
+        $this->get('/publik/kebudayaan/opk')
             ->assertOk()
-            ->assertSee('<title>Tari Lahbako · Disporabudpar Jember</title>', false)
-            ->assertSee('Paragraf dua.')
-            ->assertSee('&lt;script&gt;', false)
-            ->assertSee('Kesenian tari lainnya')
-            ->assertSee('Tari Kecak Jember')
-            ->assertDontSee('Patrol')
-            ->assertSee('class="nb on" href="'.route('publik.kebudayaan').'"', false);
+            ->assertSee('Kebudayaan ▾')
+            ->assertSee('class="nb on" href="'.route('publik.opk').'"', false);
     }
 
-    public function test_detail_404(): void
+    public function test_data_kesenian_publik_menyaring_wilayah_dan_menyembunyikan_data_pribadi(): void
     {
-        $this->get('/publik/kebudayaan/999')->assertNotFound();
-        $this->get('/publik/kebudayaan/bukan-angka')->assertNotFound();
+        $kalisat = Kecamatan::create(['nama' => 'Kalisat']);
+        $gambiran = Desa::create(['kecamatan_id' => $kalisat->id, 'nama' => 'Gambiran']);
+        Kesenian::factory()->create(['nama_kesenian' => 'Sanggar Kota', 'nama_pemilik' => 'Rahasia Pemilik', 'no_telepon' => '081299990000']);
+        Kesenian::factory()->create(['nama_kesenian' => 'Sanggar Desa', 'kecamatan_id' => $kalisat->id, 'desa_id' => $gambiran->id]);
+
+        $this->get('/publik/kebudayaan/kesenian')
+            ->assertOk()
+            ->assertSee('Sanggar Kota')
+            ->assertDontSee('Rahasia Pemilik')
+            ->assertDontSee('081299990000');
+
+        Livewire::test(DataKesenian::class)
+            ->set('kecamatan', (string) $kalisat->id)
+            ->assertSee('Sanggar Desa')->assertDontSee('Sanggar Kota')
+            ->set('desa', (string) $gambiran->id)
+            ->set('kecamatan', '')
+            ->assertSet('desa', '');
     }
 
-    public function test_tanpa_data(): void
+    public function test_daftar_dan_detail_opk_serta_cagar_budaya(): void
     {
-        $this->get('/publik/kebudayaan')->assertOk()->assertSee('Belum ada data kesenian');
+        $opk = Opk::factory()->create(['nama' => 'Wayang Orang', 'jenis' => 'Seni', 'deskripsi' => '<p>Tari <b>klasik</b></p>']);
+        $cb = CagarBudaya::factory()->create(['nama' => 'Situs Duplang', 'status' => 'CB']);
+
+        $this->get('/publik/kebudayaan/opk')->assertOk()->assertSee('Wayang Orang');
+        $this->get(route('publik.detail-opk', $opk))->assertOk()->assertSee('<b>klasik</b>', false)->assertSee('Kecamatan Wuluhan');
+        $this->get('/publik/kebudayaan/cagar-budaya')->assertOk()->assertSee('Situs Duplang');
+        $this->get(route('publik.detail-cagar-budaya', $cb))->assertOk()->assertSee('Cagar Budaya')->assertSee('peta-kecil', false);
+        $this->get('/publik/kebudayaan/opk/999')->assertNotFound();
     }
 }

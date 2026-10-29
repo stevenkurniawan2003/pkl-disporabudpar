@@ -16,7 +16,7 @@ class Wisata extends Model
 
     protected $fillable = [
         'kategori_id', 'kecamatan_id', 'nama', 'slug', 'deskripsi_singkat', 'narasi', 'alamat',
-        'latitude', 'longitude', 'link_google_maps', 'gambar_utama', 'unggulan', 'status', 'dibuat_oleh',
+        'latitude', 'longitude', 'link_google_maps', 'nomor_sk_desa_wisata', 'gambar_utama', 'unggulan', 'status', 'dibuat_oleh',
     ];
 
     protected function casts(): array

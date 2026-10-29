@@ -10,22 +10,28 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/** Data Master EKRAF: pelaku ekonomi kreatif Jember, ringkasan aktif/non aktif, dan grafiknya. */
 #[Layout('layouts.admin')]
-#[Title('Ekonomi Kreatif · Admin Disporabudpar Jember')]
+#[Title('Data Master EKRAF · Admin Disporabudpar Jember')]
 class Ekraf extends Component
 {
     use WithPagination;
 
+    /** Kolom yang dicari (pilihan di sebelah kotak pencarian). */
+    public const KOLOM_CARI = [
+        'nama_usaha' => 'Nama Usaha/Pelaku',
+        'nomor_ekraf' => 'ID Usaha/Pelaku',
+        'alamat' => 'Alamat',
+    ];
+
     #[Url(as: 'q', except: '')]
     public string $cari = '';
 
-    #[Url(as: 'subsektor', except: '')]
-    public string $subsektor = '';
+    #[Url(as: 'kolom', except: 'nama_usaha')]
+    public string $kolom = 'nama_usaha';
 
-    /** Pelaku ekraf yang sedang dibuka di modal detail. */
     public ?int $detailId = null;
 
-    /** Notifikasi di atas tabel. Form ada di modal (satu halaman), jadi tidak memakai session flash. */
     public ?string $pesan = null;
 
     public string $jenisPesan = 'ok';
@@ -35,8 +41,12 @@ class Ekraf extends Component
         $this->resetPage();
     }
 
-    public function updatedSubsektor(): void
+    public function updatedKolom(): void
     {
+        if (! isset(self::KOLOM_CARI[$this->kolom])) {
+            $this->kolom = 'nama_usaha';
+        }
+
         $this->resetPage();
     }
 
@@ -50,7 +60,6 @@ class Ekraf extends Component
         $this->detailId = null;
     }
 
-    /** Dari modal detail langsung ke modal ubah. */
     public function ubahDariDetail(): void
     {
         $id = $this->detailId;
@@ -58,7 +67,6 @@ class Ekraf extends Component
         $this->dispatch('buka-form-ekraf', id: $id)->to(EkrafForm::class);
     }
 
-    /** Dikirim EkrafForm setelah tambah/ubah berhasil. */
     #[On('ekraf-disimpan')]
     public function setelahSimpan(string $pesan): void
     {
@@ -67,20 +75,20 @@ class Ekraf extends Component
 
     public function hapus(int $id): void
     {
-        $e = EkrafModel::find($id);
+        $ekraf = EkrafModel::find($id);
 
-        if (! $e) {
-            $this->beriPesan('Data ekraf tidak ditemukan, mungkin sudah dihapus.', 'err');
+        if (! $ekraf) {
+            $this->beriPesan('Data pelaku ekraf tidak ditemukan, mungkin sudah dihapus.', 'err');
 
             return;
         }
 
-        $nama = $e->nama_usaha;
+        $nama = $ekraf->nama_usaha;
 
         try {
-            $e->delete();
-        } catch (\Throwable $ex) {
-            report($ex);
+            $ekraf->delete();
+        } catch (\Throwable $e) {
+            report($e);
             $this->beriPesan("Data \"{$nama}\" gagal dihapus. Silakan coba lagi.", 'err');
 
             return;
@@ -101,21 +109,23 @@ class Ekraf extends Component
 
     public function render()
     {
+        $kolom = isset(self::KOLOM_CARI[$this->kolom]) ? $this->kolom : 'nama_usaha';
+
         $daftar = EkrafModel::query()
-            ->when($this->cari !== '', function ($q) {
-                $kata = '%'.trim($this->cari).'%';
-                $q->where(fn ($w) => $w->where('nama_usaha', 'like', $kata)
-                    ->orWhere('nama_pemilik', 'like', $kata)
-                    ->orWhere('alamat', 'like', $kata));
-            })
-            ->when($this->subsektor !== '', fn ($q) => $q->where('subsektor', $this->subsektor))
+            ->with(['kecamatan', 'desa'])
+            ->when(trim($this->cari) !== '', fn ($q) => $q->where($kolom, 'like', '%'.addcslashes(trim($this->cari), '%_\\').'%'))
             ->latest('id_ekraf')
             ->paginate(10);
 
+        $perStatus = EkrafModel::query()->selectRaw('status, COUNT(*) AS jumlah')->groupBy('status')->pluck('jumlah', 'status');
+
         return view('livewire.admin.ekraf', [
             'daftar' => $daftar,
-            'daftarSubsektor' => EkrafModel::SUBSEKTOR,
-            'detail' => $this->detailId ? EkrafModel::find($this->detailId) : null,
+            'kolomCari' => self::KOLOM_CARI,
+            'jumlahAktif' => (int) ($perStatus['aktif'] ?? 0),
+            'jumlahNonaktif' => (int) ($perStatus['nonaktif'] ?? 0),
+            'daftarGrafik' => EkrafModel::dataGrafik(),
+            'detail' => $this->detailId ? EkrafModel::with(['kecamatan', 'desa'])->find($this->detailId) : null,
         ]);
     }
 }
