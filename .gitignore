@@ -33,3 +33,12 @@ Thumbs.db
 
 # Dokumen konsep dari dinas (referensi lokal, tidak masuk repo)
 /docs/dokumen/
+
+# Dari .gitignore branch PKL
+npm-debug.log
+yarn-error.log
+bootstrap/compiled.php
+app/storage/
+public_html/storage
+public_html/hot
+/.vagrant
