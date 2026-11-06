@@ -24,7 +24,7 @@ return new class extends Migration
         });
 
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE kunjungan_hotel ADD CONSTRAINT ck_kunj_hotel_bulan CHECK (bulan BETWEEN 1 AND 12)");
+            DB::statement('ALTER TABLE kunjungan_hotel ADD CONSTRAINT ck_kunj_hotel_bulan CHECK (bulan BETWEEN 1 AND 12)');
         }
     }
 

@@ -40,7 +40,7 @@ class BidangSeeder extends Seeder
                 ['bidang_id' => $b->id],
                 [
                     'parent_id' => $kepalaId,
-                    'jabatan' => ($b->jenis === 'uptd' ? 'Kepala ' : 'Kepala Bidang ') . $b->nama,
+                    'jabatan' => ($b->jenis === 'uptd' ? 'Kepala ' : 'Kepala Bidang ').$b->nama,
                     'urutan' => $b->urutan,
                     'created_at' => $now,
                     'updated_at' => $now,

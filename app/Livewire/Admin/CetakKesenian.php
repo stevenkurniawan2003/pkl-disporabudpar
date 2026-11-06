@@ -40,7 +40,7 @@ class CetakKesenian extends Component
 
     public function resetFilter(): void
     {
-        $this->reset();
+        $this->reset(['kecamatan', 'desa', 'jenis', 'status', 'tahun']);
     }
 
     /** @return array<string, string> filter yang terisi saja, untuk query string tautan PDF */

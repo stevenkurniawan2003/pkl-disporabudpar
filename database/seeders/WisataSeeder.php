@@ -32,6 +32,7 @@ class WisataSeeder extends Seeder
 
             if (! $kat || ! $kec) {
                 $this->command?->warn("Lewati {$nama}: jalankan KategoriSeeder dan KecamatanSeeder dulu.");
+
                 continue;
             }
 

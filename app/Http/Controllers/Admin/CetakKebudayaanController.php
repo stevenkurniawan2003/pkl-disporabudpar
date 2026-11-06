@@ -7,6 +7,7 @@ use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Models\Kesenian;
 use App\Models\PerpanjanganKik;
+use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -40,11 +41,18 @@ class CetakKebudayaanController extends Controller
             'Kabupaten Jember',
         ])->filter()->implode(' - ');
 
+        // Ambil data pejabat dari database (bukan config)
+        $pejabat = [
+            'jabatan' => 'Kepala Bidang Kebudayaan',
+            'nama' => Setting::get('kabid_kebudayaan_nama', ''),
+            'nip' => Setting::get('kabid_kebudayaan_nip', ''),
+        ];
+
         $pdf = Pdf::loadView('pdf.data-kesenian', [
             'daftar' => $daftar,
             'tahun' => $filter['tahun'] ?? now()->year,
             'keterangan' => Str::upper($keterangan),
-            'pejabat' => config('site.pejabat.kabid_kebudayaan'),
+            'pejabat' => $pejabat,
             'kop' => config('site.kop'),
             'tanggal' => now()->locale('id')->translatedFormat('j F Y'),
         ])->setPaper('a4', 'landscape');

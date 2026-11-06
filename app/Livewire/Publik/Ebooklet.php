@@ -2,12 +2,11 @@
 
 namespace App\Livewire\Publik;
 
-use App\Models\Ebooklet as EbookletModel;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
-/** E-booklet wisata Jember untuk diunduh wisatawan (saran dokumen konsep Pariwisata poin 5). */
+/** E-booklet wisata Jember: halaman statis dengan 1 link ke Google Drive (tidak ada CRUD). */
 #[Layout('layouts.publik')]
 #[Title('E-Booklet Wisata · Disporabudpar Jember')]
 class Ebooklet extends Component
@@ -15,7 +14,8 @@ class Ebooklet extends Component
     public function render()
     {
         return view('livewire.publik.ebooklet', [
-            'daftar' => EbookletModel::orderByDesc('tahun')->latest('id_ebooklet')->get(),
+            'linkEbooklet' => config('site.ebooklet_url', ''),
+            'gambarEbooklet' => config('site.ebooklet_gambar', ''),
         ]);
     }
 }

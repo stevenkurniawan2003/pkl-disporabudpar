@@ -1,20 +1,30 @@
 <div>
 <div class="page"><h1>E-Booklet Wisata</h1><p>Panduan wisata Jember terbaru untuk memudahkan wisatawan saat berkunjung ke Jember.</p>
 
-<div class="news">
-@forelse ($daftar as $e)
-    <article class="c kartu-berita" wire:key="ebooklet-{{ $e->id_ebooklet }}">
-        <div class="ph s" style="background:{{ $e->sampul_url ? 'url('.$e->sampul_url.') center/cover no-repeat' : 'linear-gradient(135deg,#C93A74,#F28BB0)' }}">@unless ($e->sampul_url)<i class="bi bi-book" aria-hidden="true"></i>@endunless</div>
-        <div class="cb">
-            <span class="bd">{{ $e->tahun }}</span>
-            <b>{{ $e->judul }}</b>
-            @if ($e->deskripsi)<p class="cuplikan">{{ $e->deskripsi }}</p>@endif
-            <a class="btn p" style="margin-top:12px;align-self:flex-start" href="{{ $e->pdf_url }}" target="_blank" rel="noopener" download><i class="bi bi-download" aria-hidden="true"></i> Unduh PDF</a>
-        </div>
-    </article>
-@empty
-    <p class="kosong-berita">Belum ada e-booklet.</p>
-@endforelse
-</div>
+@if (filled($linkEbooklet))
+    <div style="max-width:800px;margin:40px auto;text-align:center">
+        @if (filled($gambarEbooklet))
+            <div style="margin-bottom:24px">
+                <img src="{{ Str::startsWith($gambarEbooklet, ['http://', 'https://']) ? $gambarEbooklet : asset('images/' . $gambarEbooklet) }}" 
+                     alt="Cover E-Booklet Wisata Jember" 
+                     style="max-width:100%;height:auto;max-height:500px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15)">
+            </div>
+        @else
+            <div style="margin-bottom:24px">
+                <i class="bi bi-book" aria-hidden="true" style="font-size:80px;color:var(--primary)"></i>
+            </div>
+        @endif
+        
+        <h2 style="margin-bottom:12px">E-Booklet Wisata Jember</h2>
+        <p style="margin-bottom:24px;color:var(--mut);font-size:15px;line-height:1.6">
+            Panduan lengkap destinasi wisata, kuliner, akomodasi, dan informasi praktis untuk wisatawan yang berkunjung ke Kabupaten Jember.
+        </p>
+        <a class="btn p" href="{{ $linkEbooklet }}" target="_blank" rel="noopener" style="font-size:16px;padding:14px 32px">
+            <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Baca Selengkapnya
+        </a>
+    </div>
+@else
+    <p class="kosong-berita">E-booklet sedang dalam proses pembuatan.</p>
+@endif
 </div>
 </div>

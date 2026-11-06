@@ -52,6 +52,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/cetak-kesenian/pdf', [CetakKebudayaanController::class, 'dataKesenian'])->name('admin.cetak-kesenian.pdf');
         Route::get('/kunjungan-wisata', Admin\KunjunganWisata::class)->name('admin.kunjungan-wisata');
         Route::get('/kunjungan-hotel', Admin\KunjunganHotel::class)->name('admin.kunjungan-hotel');
+
+        // Pengaturan: data pejabat untuk dokumen PDF.
+        Route::get('/pengaturan/data-pejabat', Admin\Pengaturan\DataPejabat::class)->name('admin.pengaturan.data-pejabat');
     });
 });
 

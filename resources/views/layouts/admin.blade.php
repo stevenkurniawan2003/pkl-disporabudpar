@@ -32,11 +32,13 @@
         'Pariwisata' => [
             ['🗺', 'Lokasi Peta', 'admin.lokasi-peta', 'admin.lokasi-peta'],
             ['🎒', 'Paket Wisata', 'admin.paket-wisata', 'admin.paket-wisata'],
-            ['📘', 'E-Booklet', 'admin.ebooklet', 'admin.ebooklet'],
         ],
         'Kelola Data Kunjungan' => [
             ['📈', 'Data Kunjungan Wisata', 'admin.kunjungan-wisata', 'admin.kunjungan-wisata*'],
             ['🛏', 'Data Kunjungan Hotel', 'admin.kunjungan-hotel', 'admin.kunjungan-hotel*'],
+        ],
+        'Pengaturan' => [
+            ['⚙️', 'Data Pejabat', 'admin.pengaturan.data-pejabat', 'admin.pengaturan.data-pejabat'],
         ],
         'Akun' => [
             ['👤', 'Profil', 'admin.profil', 'admin.profil*'],
@@ -138,9 +140,22 @@ document.addEventListener('alpine:init', function () {
         if (side && side.classList.contains('on') && !t.closest('#side')) side.classList.remove('on');
     });
 
+    // Sinkronkan tema antar tab
+    window.addEventListener('storage', function (e) {
+        if (e.key === 'admin-tema' && e.newValue) {
+            document.documentElement.setAttribute('data-theme', e.newValue);
+        }
+    });
+
     document.addEventListener('livewire:navigated', function () {
         var side = document.getElementById('side');
         if (side) side.classList.remove('on');
+        
+        // Restore tema setelah navigasi
+        try {
+            var tema = localStorage.getItem('admin-tema');
+            if (tema) document.documentElement.setAttribute('data-theme', tema);
+        } catch (e) {}
     });
 })();
 </script>

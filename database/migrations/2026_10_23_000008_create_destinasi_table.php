@@ -39,8 +39,8 @@ return new class extends Migration
         });
 
         if (DB::getDriverName() === 'mysql') {
-            DB::statement("ALTER TABLE destinasi ADD CONSTRAINT ck_destinasi_lat CHECK (latitude BETWEEN -90 AND 90)");
-            DB::statement("ALTER TABLE destinasi ADD CONSTRAINT ck_destinasi_lng CHECK (longitude BETWEEN -180 AND 180)");
+            DB::statement('ALTER TABLE destinasi ADD CONSTRAINT ck_destinasi_lat CHECK (latitude BETWEEN -90 AND 90)');
+            DB::statement('ALTER TABLE destinasi ADD CONSTRAINT ck_destinasi_lng CHECK (longitude BETWEEN -180 AND 180)');
         }
     }
 

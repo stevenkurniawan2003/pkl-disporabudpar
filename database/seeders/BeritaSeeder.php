@@ -30,6 +30,7 @@ class BeritaSeeder extends Seeder
 
             if (! $kat) {
                 $this->command?->warn("Lewati \"{$judul}\": jalankan KategoriSeeder dulu.");
+
                 continue;
             }
 

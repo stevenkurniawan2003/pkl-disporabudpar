@@ -71,8 +71,8 @@
     <div class="ttd">
         <div>Jember, {{ $tanggal }}</div>
         <div>{{ $pejabat['jabatan'] }}</div>
-        <div class="nama">{{ $pejabat['nama'] ?: '..............................................' }}</div>
-        <div>NIP. {{ $pejabat['nip'] ?: '..............................' }}</div>
+        <div class="nama">{{ $pejabat['nama'] ?: '(____________________________)' }}</div>
+        <div>NIP. {{ $pejabat['nip'] ?: '(____________________)' }}</div>
     </div>
 </body>
 </html>

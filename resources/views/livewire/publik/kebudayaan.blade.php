@@ -1,6 +1,6 @@
 @php $angka = fn ($n) => number_format((int) $n, 0, ',', '.'); @endphp
 <div>
-<div class="page"><h1>Kebudayaan</h1><p>Rincian data kesenian, Objek Pemajuan Kebudayaan, dan cagar budaya Kabupaten Jember.</p>
+<div class="page"><h1>Ringkasan Data Kebudayaan</h1><p>Rincian data kesenian, Objek Pemajuan Kebudayaan, dan cagar budaya Kabupaten Jember.</p>
 
 <h2 class="judul-tabel" style="margin-top:0">Rincian data kesenian</h2>
 <div class="ringkas empat" aria-label="Rincian data kesenian">

@@ -12,7 +12,7 @@
         ]],
         ['Berita', 'publik.berita'],
         ['Kebudayaan', [
-            ['Dashboard Kebudayaan', 'publik.kebudayaan'],
+            ['Ringkasan Data Kebudayaan', 'publik.kebudayaan'],
             ['Data Kesenian', 'publik.data-kesenian'],
             ['Objek Pemajuan Kebudayaan', 'publik.opk'],
             ['Cagar Budaya', 'publik.cagar-budaya'],
@@ -20,13 +20,8 @@
         ['Ekonomi Kreatif', [
             ['Data EKRAF Jember', 'publik.ekonomi-kreatif'],
             ['Pencarian Data EKRAF', 'publik.pencarian-ekraf'],
-            // Elemen ketiga false: tautan biasa tanpa wire:navigate (pindah ke panel admin / halaman login).
-            ['Sistem EKRAF', 'admin.ekonomi-kreatif', false],
         ]],
         ['PPO', [
-            ['Database Atlet', 'publik.ppo-atlet'],
-            ['Database Pelatih', 'publik.ppo-pelatih'],
-            ['Database Cabor', 'publik.ppo-cabor'],
             ['Sorotan Prestasi', 'publik.ppo-prestasi'],
         ]],
         ['Profil', [
@@ -239,11 +234,24 @@
         if (e.key === 'ArrowLeft') lightbox(lbPosisi - 1);
     });
 
-    // Tutup menu setelah pindah halaman
+    // Sinkronkan tema antar tab
+    window.addEventListener('storage', function (e) {
+        if (e.key === 'publik-tema' && e.newValue) {
+            document.documentElement.setAttribute('data-theme', e.newValue);
+        }
+    });
+
+    // Tutup menu setelah pindah halaman + restore tema dari localStorage
     document.addEventListener('livewire:navigated', function () {
         q('header nav').forEach(function (n) { n.classList.remove('on'); });
         q('.bg').forEach(function (b) { b.setAttribute('aria-expanded', 'false'); });
         q('.ni.open').forEach(function (n) { n.classList.remove('open'); });
+        
+        // Restore tema setelah navigasi
+        try {
+            var tema = localStorage.getItem('publik-tema');
+            if (tema) document.documentElement.setAttribute('data-theme', tema);
+        } catch (e) {}
     });
 
     // Slider beranda; geser manual (titik/panah) menunda geser otomatis berikutnya.

@@ -43,6 +43,10 @@ return [
     // Lama (detik) angka pengunjung di footer di-cache.
     'cache_pengunjung' => 300,
 
+    // Link ke E-Booklet Wisata di Google Drive atau hosting lain (tanpa CRUD).
+    'ebooklet_url' => env('EBOOKLET_URL', ''),
+    'ebooklet_gambar' => env('EBOOKLET_GAMBAR', ''), // Path gambar cover di public/images atau URL
+
     // Kop surat & penanda tangan dokumen unduhan (Kartu Induk Kesenian, cetak data). Ganti lewat .env saat pejabat berganti.
     'kop' => [
         'pemerintah' => 'Pemerintah Kabupaten Jember',
