@@ -180,3 +180,7 @@ th.n{text-align:right}
 :root[data-theme="dark"] .grafik-kartu{--seri-3:#F2B829;--seri-4:#D08A4E;--seri-5:#AEB8C2}
 .bd.medali.emas{background:#FFF3C4;color:#8A6200}.bd.medali.perak{background:#ECEFF2;color:#4F5B66}.bd.medali.perunggu{background:#F7E3D3;color:#8A4B1C}
 .galeri-item video{display:block;background:#000}
+/* Pemilih titik lokasi (Leaflet) di form */
+.peta-pilih{height:260px;border-radius:12px;border:1px solid var(--line);overflow:hidden;background:var(--bg2);z-index:0}
+.peta-pilih-aksi{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 10px;flex-wrap:wrap}
+.peta-pilih-aksi small{color:var(--mut)}

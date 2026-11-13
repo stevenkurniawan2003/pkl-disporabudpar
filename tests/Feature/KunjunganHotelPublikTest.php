@@ -75,8 +75,8 @@ class KunjunganHotelPublikTest extends TestCase
             ->assertSee('9.214');
 
         $sql = strtolower(collect(DB::getQueryLog())->pluck('query')->implode("\n"));
-        $this->assertStringContainsString('group by `bulan`', $sql);
-        $this->assertStringContainsString('group by `hotel`.`id_hotel`', $sql);
+        $this->assertMatchesRegularExpression('/group by [`"]bulan[`"]/', $sql);
+        $this->assertMatchesRegularExpression('/group by [`"]hotel[`"]\.[`"]id_hotel[`"]/', $sql);
     }
 
     public function test_filter_hotel_dan_tahun(): void

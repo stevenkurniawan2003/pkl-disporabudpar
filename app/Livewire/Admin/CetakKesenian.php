@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Desa;
 use App\Models\Kecamatan;
 use App\Models\Kesenian;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -65,10 +66,22 @@ class CetakKesenian extends Component
             'daftarDesa' => $this->kecamatan !== '' ? Desa::where('kecamatan_id', (int) $this->kecamatan)->orderBy('nama')->get(['id', 'nama']) : collect(),
             'daftarJenis' => Kesenian::JENIS,
             'daftarStatus' => Kesenian::STATUS,
-            'daftarTahun' => Kesenian::query()->selectRaw('DISTINCT YEAR(created_at) AS tahun')->orderByDesc('tahun')->pluck('tahun')
+            'daftarTahun' => Kesenian::query()->selectRaw('DISTINCT '.$this->ekspresiTahun('created_at').' AS tahun')->orderByDesc('tahun')->pluck('tahun')
                 ->push(now()->year)->unique()->sortDesc()->values(),
             'daftar' => Kesenian::with(['kecamatan', 'desa'])->filterCetak($filter)->orderBy('kode_jenis')->orderBy('nomor_urut')->limit(500)->get(),
             'jumlah' => Kesenian::filterCetak($filter)->count(),
         ]);
+    }
+
+    /**
+     * Ekspresi SQL untuk mengambil tahun dari kolom tanggal (MySQL: YEAR, SQLite untuk test: strftime).
+     */
+    private function ekspresiTahun(string $kolom): string
+    {
+        if (DB::getDriverName() === 'sqlite') {
+            return "CAST(strftime('%Y', {$kolom}) AS INTEGER)";
+        }
+
+        return "YEAR({$kolom})";
     }
 }

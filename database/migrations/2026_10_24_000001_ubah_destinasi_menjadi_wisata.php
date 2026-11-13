@@ -34,12 +34,12 @@ return new class extends Migration
         $mysql = DB::getDriverName() === 'mysql';
 
         // 1. Lepas foreign key dan CHECK lama (dibuat ulang dengan nama baru di langkah 4).
-        Schema::table('destinasi_galeri', fn (Blueprint $t) => $t->dropForeign('fk_galeri_destinasi'));
-        Schema::table('kunjungan_wisata', fn (Blueprint $t) => $t->dropForeign('fk_kunj_wisata_destinasi'));
+        Schema::table('destinasi_galeri', fn (Blueprint $t) => $this->lepasForeign($t, 'fk_galeri_destinasi', 'destinasi_id'));
+        Schema::table('kunjungan_wisata', fn (Blueprint $t) => $this->lepasForeign($t, 'fk_kunj_wisata_destinasi', 'destinasi_id'));
         Schema::table('destinasi', function (Blueprint $t) {
-            $t->dropForeign('fk_destinasi_kategori');
-            $t->dropForeign('fk_destinasi_kecamatan');
-            $t->dropForeign('fk_destinasi_user');
+            $this->lepasForeign($t, 'fk_destinasi_kategori', 'kategori_id');
+            $this->lepasForeign($t, 'fk_destinasi_kecamatan', 'kecamatan_id');
+            $this->lepasForeign($t, 'fk_destinasi_user', 'dibuat_oleh');
         });
 
         if ($mysql) {
@@ -68,10 +68,8 @@ return new class extends Migration
             }
         });
 
-        Schema::table('galeri_wisata', function (Blueprint $t) {
-            $t->renameColumn('destinasi_id', 'wisata_id');
-            $t->renameIndex('idx_galeri_destinasi', 'idx_galeri_wisata');
-        });
+        Schema::table('galeri_wisata', fn (Blueprint $t) => $t->renameColumn('destinasi_id', 'wisata_id'));
+        Schema::table('galeri_wisata', fn (Blueprint $t) => $t->renameIndex('idx_galeri_destinasi', 'idx_galeri_wisata'));
 
         Schema::table('kunjungan_wisata', fn (Blueprint $t) => $t->renameColumn('destinasi_id', 'wisata_id'));
 
@@ -98,12 +96,12 @@ return new class extends Migration
     {
         $mysql = DB::getDriverName() === 'mysql';
 
-        Schema::table('galeri_wisata', fn (Blueprint $t) => $t->dropForeign('fk_galeri_wisata'));
-        Schema::table('kunjungan_wisata', fn (Blueprint $t) => $t->dropForeign('fk_kunj_wisata_wisata'));
+        Schema::table('galeri_wisata', fn (Blueprint $t) => $this->lepasForeign($t, 'fk_galeri_wisata', 'wisata_id'));
+        Schema::table('kunjungan_wisata', fn (Blueprint $t) => $this->lepasForeign($t, 'fk_kunj_wisata_wisata', 'wisata_id'));
         Schema::table('wisata', function (Blueprint $t) {
-            $t->dropForeign('fk_wisata_kategori');
-            $t->dropForeign('fk_wisata_kecamatan');
-            $t->dropForeign('fk_wisata_user');
+            $this->lepasForeign($t, 'fk_wisata_kategori', 'kategori_id');
+            $this->lepasForeign($t, 'fk_wisata_kecamatan', 'kecamatan_id');
+            $this->lepasForeign($t, 'fk_wisata_user', 'dibuat_oleh');
         });
 
         if ($mysql) {
@@ -130,10 +128,8 @@ return new class extends Migration
             }
         });
 
-        Schema::table('destinasi_galeri', function (Blueprint $t) {
-            $t->renameColumn('wisata_id', 'destinasi_id');
-            $t->renameIndex('idx_galeri_wisata', 'idx_galeri_destinasi');
-        });
+        Schema::table('destinasi_galeri', fn (Blueprint $t) => $t->renameColumn('wisata_id', 'destinasi_id'));
+        Schema::table('destinasi_galeri', fn (Blueprint $t) => $t->renameIndex('idx_galeri_wisata', 'idx_galeri_destinasi'));
 
         Schema::table('kunjungan_wisata', fn (Blueprint $t) => $t->renameColumn('wisata_id', 'destinasi_id'));
 
@@ -152,6 +148,18 @@ return new class extends Migration
         if ($mysql) {
             DB::statement('ALTER TABLE destinasi ADD CONSTRAINT ck_destinasi_lat CHECK (latitude BETWEEN -90 AND 90)');
             DB::statement('ALTER TABLE destinasi ADD CONSTRAINT ck_destinasi_lng CHECK (longitude BETWEEN -180 AND 180)');
+        }
+    }
+
+    /**
+     * Lepas foreign key: MySQL memakai nama constraint, SQLite hanya bisa lewat nama kolom.
+     */
+    private function lepasForeign(Blueprint $table, string $namaForeign, string $kolom): void
+    {
+        if (DB::getDriverName() === 'mysql') {
+            $table->dropForeign($namaForeign);
+        } else {
+            $table->dropForeign([$kolom]);
         }
     }
 };

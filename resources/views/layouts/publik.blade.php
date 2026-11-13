@@ -119,11 +119,11 @@
             </div>
 
             {{-- Kolom 2: tautan cepat --}}
-            <div>
-                <h4>Tautan Cepat</h4>
+            <div class="footer-tautan-cepat">
+                <h4>Tautan Cepat <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i></h4>
                 <ul class="f-link">
                     @foreach ($situs['tautan_cepat'] as $t)
-                        <li><a href="{{ $t['url'] }}" target="_blank" rel="noopener noreferrer">{{ $t['nama'] }} <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i><span class="sr">(tab baru)</span></a></li>
+                        <li><a href="{{ $t['url'] }}" target="_blank" rel="noopener noreferrer">{{ $t['nama'] }}<span class="sr"> (tab baru)</span></a></li>
                     @endforeach
                 </ul>
             </div>

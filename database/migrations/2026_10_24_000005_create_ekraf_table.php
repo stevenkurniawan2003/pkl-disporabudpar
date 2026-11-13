@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('deskripsi');
             $table->timestamps();
 
-            $table->index('subsektor', 'idx_ekraf_subsektor');
+            $table->index('subsektor', 'idx_ekraf_subsektor_teks');
             $table->index('nama_usaha', 'idx_ekraf_nama_usaha');
         });
     }

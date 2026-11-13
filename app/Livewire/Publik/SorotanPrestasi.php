@@ -35,7 +35,7 @@ class SorotanPrestasi extends Component
             ->when(isset(Cabor::DAFTAR[$this->cabor]), fn ($q) => $q->where('kode_cabor', $this->cabor))
             ->when(ctype_digit($this->tahun), fn ($q) => $q->where('tahun', (int) $this->tahun))
             ->orderByDesc('tahun')
-            ->orderByRaw("FIELD(jenis_medali, 'Emas', 'Perak', 'Perunggu')")
+            ->orderByRaw("CASE jenis_medali WHEN 'Emas' THEN 1 WHEN 'Perak' THEN 2 WHEN 'Perunggu' THEN 3 ELSE 0 END")
             ->orderBy('nama_atlet')
             ->paginate(15);
 

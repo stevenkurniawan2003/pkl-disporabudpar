@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -24,9 +25,21 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('kunjungan_wisata', function (Blueprint $table) {
-            $table->dropForeign('fk_kunj_wisata_user');
+            $this->lepasForeign($table, 'fk_kunj_wisata_user', 'dicatat_oleh');
             $table->dropIndex('idx_kunj_wisata_pencatat');
             $table->dropColumn(['keterangan', 'dicatat_oleh']);
         });
+    }
+
+    /**
+     * Lepas foreign key: MySQL memakai nama constraint, SQLite hanya bisa lewat nama kolom.
+     */
+    private function lepasForeign(Blueprint $table, string $namaForeign, string $kolom): void
+    {
+        if (DB::getDriverName() === 'mysql') {
+            $table->dropForeign($namaForeign);
+        } else {
+            $table->dropForeign([$kolom]);
+        }
     }
 };

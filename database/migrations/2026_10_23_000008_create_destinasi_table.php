@@ -32,7 +32,9 @@ return new class extends Migration
             $table->index('kecamatan_id', 'idx_destinasi_kecamatan');
             $table->index(['latitude', 'longitude'], 'idx_destinasi_koordinat');
             $table->index('dibuat_oleh', 'idx_destinasi_dibuat_oleh');
-            $table->fullText(['nama', 'alamat'], 'ft_destinasi_cari');
+            if (DB::getDriverName() === 'mysql') {
+                $table->fullText(['nama', 'alamat'], 'ft_destinasi_cari');
+            }
             $table->foreign('kategori_id', 'fk_destinasi_kategori')->references('id')->on('kategori_destinasi')->cascadeOnUpdate();
             $table->foreign('kecamatan_id', 'fk_destinasi_kecamatan')->references('id')->on('kecamatan')->cascadeOnUpdate();
             $table->foreign('dibuat_oleh', 'fk_destinasi_user')->references('id')->on('users')->nullOnDelete()->cascadeOnUpdate();

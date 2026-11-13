@@ -28,7 +28,9 @@ return new class extends Migration
             $table->index(['kategori_berita_id', 'status', 'tanggal_terbit'], 'idx_berita_kategori');
             $table->index('jumlah_dibaca', 'idx_berita_populer');
             $table->index('penulis_id', 'idx_berita_penulis');
-            $table->fullText(['judul', 'ringkasan'], 'ft_berita_cari');
+            if (DB::getDriverName() === 'mysql') {
+                $table->fullText(['judul', 'ringkasan'], 'ft_berita_cari');
+            }
             $table->foreign('kategori_berita_id', 'fk_berita_kategori')->references('id')->on('kategori_berita')->cascadeOnUpdate();
             $table->foreign('penulis_id', 'fk_berita_penulis')->references('id')->on('users')->nullOnDelete()->cascadeOnUpdate();
         });

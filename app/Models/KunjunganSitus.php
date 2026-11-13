@@ -27,11 +27,12 @@ class KunjunganSitus extends Model
     {
         return Cache::remember(self::KUNCI_CACHE, config('site.cache_pengunjung', 300), function () {
             $hariIni = now()->toDateString();
+            $besok = now()->addDay()->toDateString();
             $awalBulan = now()->startOfMonth()->toDateString();
 
             $baris = static::query()
                 ->selectRaw('COUNT(*) AS total')
-                ->selectRaw('COALESCE(SUM(CASE WHEN tanggal = ? THEN 1 ELSE 0 END), 0) AS hari_ini', [$hariIni])
+                ->selectRaw('COALESCE(SUM(CASE WHEN tanggal >= ? AND tanggal < ? THEN 1 ELSE 0 END), 0) AS hari_ini', [$hariIni, $besok])
                 ->selectRaw('COALESCE(SUM(CASE WHEN tanggal >= ? THEN 1 ELSE 0 END), 0) AS bulan_ini', [$awalBulan])
                 ->toBase()
                 ->first();

@@ -53,22 +53,7 @@
                         @endif
                     </div>
 
-                    <div class="fd full">
-                        <label>Titik peta</label>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                            <div class="fd">
-                                <label for="hotel_lat">Latitude</label>
-                                <input id="hotel_lat" type="text" inputmode="decimal" wire:model="latitude" placeholder="-8.1724">
-                                @error('latitude') <small class="err-msg">{{ $message }}</small> @enderror
-                            </div>
-                            <div class="fd">
-                                <label for="hotel_lng">Longitude</label>
-                                <input id="hotel_lng" type="text" inputmode="decimal" wire:model="longitude" placeholder="113.6995">
-                                @error('longitude') <small class="err-msg">{{ $message }}</small> @enderror
-                            </div>
-                        </div>
-                        <small style="color:var(--mut)">Wajib diisi. Tips: di Google Maps klik kanan pada lokasi, lalu klik angka koordinat untuk menyalin.</small>
-                    </div>
+                    @include('livewire.admin.partials.pilih-titik-peta', ['awalan' => 'hotel', 'label' => 'Titik peta'])
 
                     <div class="fd">
                         <label for="link_google_maps">Link Google Maps <span class="opsional">(opsional)</span></label>

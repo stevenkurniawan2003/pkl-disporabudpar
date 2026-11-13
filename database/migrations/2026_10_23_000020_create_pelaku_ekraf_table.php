@@ -23,7 +23,9 @@ return new class extends Migration
 
             $table->index(['subsektor_id', 'status'], 'idx_ekraf_subsektor');
             $table->index('kecamatan_id', 'idx_ekraf_kecamatan');
-            $table->fullText(['nama_usaha', 'nama_pemilik'], 'ft_ekraf_cari');
+            if (DB::getDriverName() === 'mysql') {
+                $table->fullText(['nama_usaha', 'nama_pemilik'], 'ft_ekraf_cari');
+            }
             $table->foreign('subsektor_id', 'fk_ekraf_subsektor')->references('id')->on('subsektor_ekraf')->cascadeOnUpdate();
             $table->foreign('kecamatan_id', 'fk_ekraf_kecamatan')->references('id')->on('kecamatan')->cascadeOnUpdate();
         });

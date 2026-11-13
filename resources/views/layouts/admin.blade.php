@@ -51,6 +51,9 @@
 <title>{{ $title ?? 'Admin · Disporabudpar Jember' }}</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
+{{-- Leaflet untuk pemilih titik lokasi di form (wisata, hotel, cagar budaya, dll.). --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 <script>try{var t=localStorage.getItem('admin-tema');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 @livewireStyles
 </head><body>

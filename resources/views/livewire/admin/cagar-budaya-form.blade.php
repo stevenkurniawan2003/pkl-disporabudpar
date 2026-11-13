@@ -26,22 +26,7 @@
                         @error('alamat') <small class="err-msg">{{ $message }}</small> @enderror
                     </div>
 
-                    <div class="fd full">
-                        <label>Titik koordinat</label>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                            <div class="fd">
-                                <label for="cb_lat">Latitude</label>
-                                <input id="cb_lat" type="text" inputmode="decimal" wire:model="latitude" placeholder="-8.1724">
-                                @error('latitude') <small class="err-msg">{{ $message }}</small> @enderror
-                            </div>
-                            <div class="fd">
-                                <label for="cb_lng">Longitude</label>
-                                <input id="cb_lng" type="text" inputmode="decimal" wire:model="longitude" placeholder="113.6995">
-                                @error('longitude') <small class="err-msg">{{ $message }}</small> @enderror
-                            </div>
-                        </div>
-                        <small style="color:var(--mut)">Tips: di Google Maps klik kanan pada lokasi, lalu klik angka koordinat untuk menyalin.</small>
-                    </div>
+                    @include('livewire.admin.partials.pilih-titik-peta', ['awalan' => 'cb', 'label' => 'Titik koordinat'])
 
                     <div class="fd">
                         <label for="cb_kategori">Kategori ODCB/CB</label>

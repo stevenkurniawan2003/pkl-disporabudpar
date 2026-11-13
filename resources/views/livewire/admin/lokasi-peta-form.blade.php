@@ -35,17 +35,7 @@
                         @error('alamat') <small class="err-msg">{{ $message }}</small> @enderror
                     </div>
 
-                    <div class="fd">
-                        <label for="lokasi_lat">Latitude</label>
-                        <input id="lokasi_lat" type="text" inputmode="decimal" wire:model="latitude" placeholder="-8.1724">
-                        @error('latitude') <small class="err-msg">{{ $message }}</small> @enderror
-                    </div>
-
-                    <div class="fd">
-                        <label for="lokasi_lng">Longitude</label>
-                        <input id="lokasi_lng" type="text" inputmode="decimal" wire:model="longitude" placeholder="113.6995">
-                        @error('longitude') <small class="err-msg">{{ $message }}</small> @enderror
-                    </div>
+                    @include('livewire.admin.partials.pilih-titik-peta', ['awalan' => 'lokasi', 'label' => 'Titik lokasi'])
 
                     <div class="fd full">
                         <label for="lokasi_deskripsi">Deskripsi singkat <span class="opsional">(opsional, tampil di popup peta)</span></label>

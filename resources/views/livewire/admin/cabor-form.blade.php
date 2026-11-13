@@ -51,21 +51,7 @@
                         @error('alamat_sekretariat') <small class="err-msg">{{ $message }}</small> @enderror
                     </div>
 
-                    <div class="fd full">
-                        <label>Titik lokasi sekretariat <span class="opsional">(opsional, untuk peta)</span></label>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-                            <div class="fd">
-                                <label for="cabor_lat">Latitude</label>
-                                <input id="cabor_lat" type="text" inputmode="decimal" wire:model="latitude" placeholder="-8.1724">
-                                @error('latitude') <small class="err-msg">{{ $message }}</small> @enderror
-                            </div>
-                            <div class="fd">
-                                <label for="cabor_lng">Longitude</label>
-                                <input id="cabor_lng" type="text" inputmode="decimal" wire:model="longitude" placeholder="113.6995">
-                                @error('longitude') <small class="err-msg">{{ $message }}</small> @enderror
-                            </div>
-                        </div>
-                    </div>
+                    @include('livewire.admin.partials.pilih-titik-peta', ['awalan' => 'cabor', 'label' => 'Titik lokasi sekretariat', 'keterangan' => 'untuk peta', 'opsional' => true])
 
                     <div class="fd">
                         <label for="cabor_atlet">Jumlah atlet aktif</label>

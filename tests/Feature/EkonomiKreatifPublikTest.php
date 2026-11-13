@@ -37,13 +37,13 @@ class EkonomiKreatifPublikTest extends TestCase
         $this->assertSame(2, $subsektor['seri'][0]['data'][8]);
     }
 
-    public function test_menu_ekonomi_kreatif_berisi_sistem_ekraf_tanpa_wire_navigate(): void
+    public function test_menu_ekonomi_kreatif_tidak_menautkan_panel_admin(): void
     {
         $this->get('/publik/ekonomi-kreatif/pencarian')
             ->assertOk()
             ->assertSee('Ekonomi Kreatif ▾')
             ->assertSee('class="nb on" href="'.route('publik.pencarian-ekraf').'"', false)
-            ->assertSee('<a class="nb" href="'.route('admin.ekonomi-kreatif').'">Sistem EKRAF', false);
+            ->assertDontSee('Sistem EKRAF');
     }
 
     public function test_pencarian_filter_kecamatan_desa_subsektor_tanpa_data_pribadi(): void

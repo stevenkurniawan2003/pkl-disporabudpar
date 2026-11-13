@@ -24,7 +24,9 @@ return new class extends Migration
             $table->unique('no_kartu_induk', 'uq_kesenian_kartu');
             $table->index(['jenis_kesenian_id', 'status'], 'idx_kesenian_jenis');
             $table->index('kecamatan_id', 'idx_kesenian_kecamatan');
-            $table->fullText('nama', 'ft_kesenian_cari');
+            if (DB::getDriverName() === 'mysql') {
+                $table->fullText('nama', 'ft_kesenian_cari');
+            }
             $table->foreign('jenis_kesenian_id', 'fk_kesenian_jenis')->references('id')->on('jenis_kesenian')->cascadeOnUpdate();
             $table->foreign('kecamatan_id', 'fk_kesenian_kecamatan')->references('id')->on('kecamatan')->cascadeOnUpdate();
         });

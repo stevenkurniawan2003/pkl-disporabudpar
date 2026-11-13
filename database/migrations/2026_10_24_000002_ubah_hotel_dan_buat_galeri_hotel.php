@@ -14,7 +14,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('kunjungan_hotel', fn (Blueprint $t) => $t->dropForeign('fk_kunj_hotel_hotel'));
+        Schema::table('kunjungan_hotel', fn (Blueprint $t) => $this->lepasForeign($t, 'fk_kunj_hotel_hotel', 'hotel_id'));
         Schema::dropIfExists('hotel');
 
         Schema::create('hotel', function (Blueprint $table) {
@@ -57,7 +57,7 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('kunjungan_hotel', fn (Blueprint $t) => $t->dropForeign('fk_kunj_hotel_hotel'));
+        Schema::table('kunjungan_hotel', fn (Blueprint $t) => $this->lepasForeign($t, 'fk_kunj_hotel_hotel', 'hotel_id'));
         Schema::dropIfExists('galeri_hotel');
         Schema::dropIfExists('hotel');
 
@@ -80,5 +80,17 @@ return new class extends Migration
         Schema::table('kunjungan_hotel', function (Blueprint $t) {
             $t->foreign('hotel_id', 'fk_kunj_hotel_hotel')->references('id')->on('hotel')->cascadeOnDelete()->cascadeOnUpdate();
         });
+    }
+
+    /**
+     * Lepas foreign key: MySQL memakai nama constraint, SQLite hanya bisa lewat nama kolom.
+     */
+    private function lepasForeign(Blueprint $table, string $namaForeign, string $kolom): void
+    {
+        if (DB::getDriverName() === 'mysql') {
+            $table->dropForeign($namaForeign);
+        } else {
+            $table->dropForeign([$kolom]);
+        }
     }
 };

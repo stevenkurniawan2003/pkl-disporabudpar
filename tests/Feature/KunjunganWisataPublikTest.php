@@ -99,8 +99,8 @@ class KunjunganWisataPublikTest extends TestCase
             ->assertSeeInOrder(['Wisata Rembangan', '5.000', 'Pantai Papuma', '3.070']);
 
         $sql = strtolower(collect(DB::getQueryLog())->pluck('query')->implode("\n"));
-        $this->assertStringContainsString('group by `bulan`', $sql);
-        $this->assertStringContainsString('group by `wisata`.`id`', $sql);
+        $this->assertMatchesRegularExpression('/group by [`"]bulan[`"]/', $sql);
+        $this->assertMatchesRegularExpression('/group by [`"]wisata[`"]\.[`"]id[`"]/', $sql);
     }
 
     public function test_filter_destinasi_mengirim_data_grafik_baru(): void

@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Percayai proxy (mis. Cloudflare Tunnel) agar skema HTTPS & host asli terbaca.
+        $middleware->trustProxies(at: '*');
+
         // Belum login -> diarahkan ke /admin/login, sudah login -> ke dashboard admin.
         $middleware->redirectGuestsTo(fn () => route('admin.login'));
         $middleware->redirectUsersTo(fn () => route('admin.dashboard'));

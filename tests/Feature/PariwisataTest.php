@@ -117,7 +117,7 @@ class PariwisataTest extends TestCase
         $this->get('/publik/peta-wisata')->assertOk()->assertSee('Paket Papuma 2 Hari');
     }
 
-    public function test_ebooklet_unggah_pdf_dan_bisa_diunduh_publik(): void
+    public function test_ebooklet_admin_unggah_pdf(): void
     {
         Livewire::test(EbookletPage::class)
             ->set('judul', 'Panduan')->set('pdf', UploadedFile::fake()->image('bukan.jpg'))->call('simpan')->assertHasErrors(['pdf' => 'mimes'])
@@ -126,8 +126,18 @@ class PariwisataTest extends TestCase
 
         $e = Ebooklet::firstOrFail();
         Storage::disk('public')->assertExists($e->file_pdf);
+    }
 
-        $this->get('/publik/ebooklet')->assertOk()->assertSee('Jember Travel Guide 2026')->assertSee($e->pdf_url, false);
+    public function test_ebooklet_publik_menautkan_google_drive_dari_konfigurasi(): void
+    {
+        config(['site.ebooklet_url' => '']);
+        $this->get('/publik/ebooklet')->assertOk()->assertSee('E-booklet sedang dalam proses pembuatan.');
+
+        config(['site.ebooklet_url' => 'https://drive.google.com/file/d/contoh/view']);
+
+        $this->get('/publik/ebooklet')->assertOk()
+            ->assertSee('href="https://drive.google.com/file/d/contoh/view"', false)
+            ->assertSee('Baca Selengkapnya');
     }
 
     public function test_desa_wisata_menampilkan_sk_bupati(): void

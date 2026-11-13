@@ -84,7 +84,7 @@ class DashboardTest extends TestCase
         // Agregasi dilakukan di database, bukan dengan mengambil semua baris.
         $sql = collect(DB::getQueryLog())->pluck('query')->implode("\n");
         $this->assertStringContainsString('sum(domestik)', strtolower($sql));
-        $this->assertStringContainsString('group by `bulan`', strtolower($sql));
+        $this->assertMatchesRegularExpression('/group by [`"]bulan[`"]/', strtolower($sql));
     }
 
     public function test_tahun_tidak_masuk_akal_dari_url_kembali_ke_tahun_berjalan(): void
