@@ -60,7 +60,7 @@
 <div class="app">
     <aside id="side">
         <div class="brand">
-            <span class="logo">J</span>
+            <img src="{{ asset('images/logo-jember.png') }}" alt="Logo Kabupaten Jember" class="logo">
             <div><b>Disporabudpar</b><small>Panel Admin</small></div>
         </div>
         <nav>

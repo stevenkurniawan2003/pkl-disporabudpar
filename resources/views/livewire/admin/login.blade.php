@@ -3,7 +3,7 @@
     <div class="login-side" aria-hidden="true">
         <svg class="login-deko" viewBox="0 0 200 200"><circle cx="100" cy="100" r="90" fill="none" stroke="#fff" stroke-width="3"></circle><circle cx="100" cy="100" r="60" fill="none" stroke="#fff" stroke-width="3"></circle><circle cx="100" cy="100" r="30" fill="#fff"></circle></svg>
         <div class="brand">
-            <div class="logo">D</div>
+            <img src="{{ asset('images/logo-jember-96x96.png') }}" alt="Logo Kabupaten Jember" class="logo logo-lg">
             <div><b>Disporabudpar</b><small>Kabupaten Jember</small></div>
         </div>
         <div>
@@ -22,7 +22,7 @@
 
         <div class="login-card">
             <div class="brand login-brand-hp">
-                <div class="logo">D</div>
+                <img src="{{ asset('images/logo-jember.png') }}" alt="Logo Kabupaten Jember" class="logo">
                 <div><b>Disporabudpar</b><small>Kabupaten Jember · Admin</small></div>
             </div>
 

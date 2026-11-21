@@ -59,7 +59,7 @@
 <header>
     <div class="w hb">
         <a class="logo" href="{{ route('publik.beranda') }}" wire:navigate>
-            <span class="lg">J</span>
+            <img src="{{ asset('images/logo-jember.png') }}" alt="Logo Kabupaten Jember" class="lg">
             <span>Disporabudpar<small>Kabupaten Jember</small></span>
         </a>
         <button type="button" class="bg" aria-label="Buka menu" aria-controls="menu-utama" aria-expanded="false">☰</button>
@@ -100,8 +100,8 @@
         <div class="fg">
             {{-- Kolom 1: dinas + media sosial --}}
             <div class="f-dinas">
-                <a class="logo" href="{{ route('publik.beranda') }}" wire:navigate>
-                    <span class="lg">J</span>
+                <a class="logo f-logo" href="{{ route('publik.beranda') }}" wire:navigate>
+                    <img src="{{ asset('images/logo-jember-96x96.png') }}" alt="Logo Kabupaten Jember">
                     <span>Disporabudpar<small>Kabupaten Jember</small></span>
                 </a>
                 <p class="f-nama">{{ $situs['nama_dinas'] }}</p>

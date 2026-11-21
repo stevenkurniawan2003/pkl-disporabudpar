@@ -13,6 +13,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:25;background:va
 .hb{display:flex;align-items:center;gap:20px;height:64px}
 .logo{display:flex;gap:10px;align-items:center;font-weight:800;cursor:pointer;border:0;background:none;padding:0}
 .lg{width:36px;height:36px;border-radius:10px;background:var(--pink);color:var(--onpink);display:grid;place-items:center}
+.lg img,.logo img{width:100%;height:100%;object-fit:contain;object-position:center}
 .logo small{display:block;font-weight:500;color:var(--mut);font-size:11px;line-height:1.1;text-align:left}
 nav{display:flex;gap:2px;margin-left:auto;align-items:center}
 .ni{position:relative}
@@ -113,6 +114,8 @@ nav a i{width:18px;text-align:center;font-style:normal}
 .fg{grid-template-columns:1.3fr 1fr 0.8fr 1.3fr;gap:28px}
 footer a{color:inherit}
 .f-dinas .logo{margin-bottom:10px}
+.f-logo{gap:14px!important}
+.f-logo img{width:56px;height:56px;object-fit:contain;object-position:center}
 .f-nama{font-weight:700;color:var(--ink)!important;font-size:14px}
 .sosmed{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .sosmed a{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--bg);border:1px solid var(--line);color:var(--pinkink);font-size:17px}

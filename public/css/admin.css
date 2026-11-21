@@ -12,6 +12,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 aside{border-right:1px solid var(--line);padding:20px 14px;position:sticky;top:0;height:100vh;overflow:auto;background:var(--bg)}
 .brand{display:flex;gap:10px;align-items:center;padding:0 8px 18px}
 .logo{width:36px;height:36px;border-radius:10px;background:var(--pink);color:var(--onpink);display:grid;place-items:center;font-weight:700}
+.logo img{width:100%;height:100%;object-fit:contain;object-position:center}
 .brand b{display:block;line-height:1.2}.brand small{color:var(--mut);font-size:12px}
 .nav-h{font-size:12px;color:var(--mut);padding:14px 10px 6px}
 nav button{display:flex;width:100%;gap:10px;align-items:center;padding:9px 10px;border:0;background:none;border-radius:10px;cursor:pointer;text-align:left;color:var(--mut);font-weight:500}
@@ -96,7 +97,7 @@ nav a i{width:18px;text-align:center;font-style:normal}
 .login-wrap{min-height:100vh;padding:0;background:var(--bg2)}
 .login-shell{min-height:100vh;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}
 .login-side{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:24px;padding:40px 44px;color:#fff;background:linear-gradient(140deg,#E8487F 0%,#B0245A 100%)}
-.login-side .brand{padding:0}.login-side .logo{background:#fff;color:#B0245A}.login-side .brand small,.login-side>small{color:rgba(255,255,255,.8)}
+.login-side .brand{padding:0}.login-side .logo{background:#fff;color:#B0245A}.login-side .logo.logo-lg{width:72px;height:72px;border-radius:16px}.login-side .brand small,.login-side>small{color:rgba(255,255,255,.8)}
 .login-side h2{font-size:clamp(26px,3vw,36px);line-height:1.15;margin:0 0 12px;font-weight:700;max-width:420px}
 .login-side p{margin:0;max-width:420px;opacity:.92}
 .login-deko{position:absolute;right:-90px;bottom:-90px;width:380px;opacity:.18;pointer-events:none}

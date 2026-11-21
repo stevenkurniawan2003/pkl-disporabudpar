@@ -58,7 +58,7 @@
             </div>
             <div class="fd">
                 <label for="prestasi_tahun">Tahun</label>
-                <input id="prestasi_tahun" type="text" inputmode="numeric" maxlength="4" wire:model="tahun">
+                <input id="prestasi_tahun" type="number" min="1900" max="{{ now()->year }}" wire:model="tahun">
                 @error('tahun') <small class="err-msg">{{ $message }}</small> @enderror
             </div>
         </div>

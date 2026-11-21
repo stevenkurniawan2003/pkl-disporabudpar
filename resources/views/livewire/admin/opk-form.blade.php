@@ -56,7 +56,7 @@
 
                     <div class="fd">
                         <label for="opk_tahun">Tahun <span class="opsional">(opsional)</span></label>
-                        <input id="opk_tahun" type="text" inputmode="numeric" maxlength="4" wire:model="tahun" placeholder="Contoh: 1900">
+                        <input id="opk_tahun" type="number" min="1900" max="{{ now()->year }}" wire:model="tahun" placeholder="Contoh: 1900">
                         @error('tahun') <small class="err-msg">{{ $message }}</small> @enderror
                     </div>
 

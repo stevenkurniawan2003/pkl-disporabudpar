@@ -41,7 +41,7 @@
 
                     <div class="fd">
                         <label for="cb_tahun">Tahun <span class="opsional">(opsional)</span></label>
-                        <input id="cb_tahun" type="text" inputmode="numeric" maxlength="4" wire:model="tahun" placeholder="Contoh: 1930">
+                        <input id="cb_tahun" type="number" min="1000" max="{{ now()->year }}" wire:model="tahun" placeholder="Contoh: 1930">
                         @error('tahun') <small class="err-msg">{{ $message }}</small> @enderror
                     </div>
 

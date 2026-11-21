@@ -41,7 +41,7 @@
 
                     <div class="fd">
                         <label for="paket_harga">Harga <span class="opsional">(opsional)</span></label>
-                        <input id="paket_harga" type="text" wire:model="harga" placeholder="Contoh: Rp 350.000/orang">
+                        <input id="paket_harga" type="number" min="0" step="1" wire:model="harga" placeholder="Contoh: 350000">
                         @error('harga') <small class="err-msg">{{ $message }}</small> @enderror
                     </div>
 

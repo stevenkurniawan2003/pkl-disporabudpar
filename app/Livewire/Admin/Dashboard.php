@@ -80,12 +80,16 @@ class Dashboard extends Component
         return $data;
     }
 
-    /** Pilihan tahun: tahun yang sudah punya data + tahun berjalan + tahun terpilih. */
+    /** Pilihan tahun: tahun yang sudah punya data + tahun berjalan + 5 tahun ke belakang + tahun terpilih. */
     private function daftarTahun(Builder $query, int $terpilih): Collection
     {
+        $tahunSekarang = now()->year;
+
         return $query->distinct()->pluck('tahun')
-            ->push(now()->year)
+            ->push($tahunSekarang)
             ->push($terpilih)
+            // Tambahkan 5 tahun ke belakang dari tahun sekarang
+            ->merge(range($tahunSekarang - 4, $tahunSekarang))
             ->map(fn ($t) => (int) $t)
             ->unique()
             ->sortDesc()
