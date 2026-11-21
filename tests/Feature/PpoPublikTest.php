@@ -67,8 +67,12 @@ class PpoPublikTest extends TestCase
             ->assertSee('Foto podium')
             ->assertSee('<video', false)
             ->assertSee('id="grafik-prestasi"', false)
-            ->assertSee('Juara Lama');
+            ->assertSee('Juara Baru');
 
-        Livewire::test(SorotanPrestasi::class)->set('tahun', '2025')->assertSee('Juara Baru')->assertDontSee('Juara Lama');
+        Livewire::test(SorotanPrestasi::class)
+            ->assertViewHas('daftarTahun', fn ($t) => $t->count() === 5)
+            ->set('tahun', 2023)
+            ->assertSee('Juara Lama')
+            ->assertDontSee('Juara Baru');
     }
 }

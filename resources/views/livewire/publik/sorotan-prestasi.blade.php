@@ -38,7 +38,6 @@
         @endforeach
     </select>
     <select wire:model.live="tahun" aria-label="Pilih tahun">
-        <option value="">Semua tahun</option>
         @foreach ($daftarTahun as $t)
             <option value="{{ $t }}">{{ $t }}</option>
         @endforeach

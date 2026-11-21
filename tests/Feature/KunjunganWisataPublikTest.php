@@ -71,7 +71,7 @@ class KunjunganWisataPublikTest extends TestCase
 
         Livewire::test(Halaman::class)
             ->assertSet('tahun', 2025)
-            ->assertViewHas('daftarTahun', fn ($t) => $t->all() === [2025, 2024, 2023]);
+            ->assertViewHas('daftarTahun', fn ($t) => collect([2025, 2024, 2023])->every(fn ($th) => $t->contains($th)) && $t->count() >= 6);
 
         // Tahun dari URL yang tidak punya data -> kembali ke default.
         Livewire::withQueryParams(['tahun' => 1999])->test(Halaman::class)->assertSet('tahun', 2025);

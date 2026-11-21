@@ -54,8 +54,9 @@ abstract class HalamanKunjungan extends Component
     {
         $daftarTahun = $this->daftarTahun();
 
-        if (! $daftarTahun->contains($this->tahun)) {
-            $this->tahun = $daftarTahun->first() ?? now()->year;
+        if ($this->tahun === 0 || ! $daftarTahun->contains($this->tahun)) {
+            $tahunDataTerbaru = $this->queryPublik()->max('tahun');
+            $this->tahun = $tahunDataTerbaru ? (int) $tahunDataTerbaru : ($daftarTahun->first() ?? now()->year);
         }
 
         if ($this->pilihan !== 0 && ! $this->daftarPilihan()->contains('id', $this->pilihan)) {
@@ -63,10 +64,19 @@ abstract class HalamanKunjungan extends Component
         }
     }
 
-    /** Tahun yang punya data, terbaru dulu. */
+    /** Tahun yang punya data + minimal 5 tahun terakhir (tahun berjalan s/d 5 tahun sebelumnya), terbaru dulu. */
     private function daftarTahun(): Collection
     {
-        return $this->queryPublik()->distinct()->orderByDesc('tahun')->pluck('tahun')->map(fn ($t) => (int) $t);
+        $tahunSekarang = now()->year;
+
+        return $this->queryPublik()
+            ->distinct()
+            ->pluck('tahun')
+            ->merge(range($tahunSekarang - 5, $tahunSekarang))
+            ->map(fn ($t) => (int) $t)
+            ->unique()
+            ->sortDesc()
+            ->values();
     }
 
     private function queryTersaring(): Builder
